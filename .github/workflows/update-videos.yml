@@ -1,7 +1,8 @@
 name: Update videos and prices
 # Runs by itself every day at 06:00 IST, and a minute after you save a change to a file in data/ on GitHub.
 #  - videos.json         <- your YouTube channel feed
-#  - data/fuel-daily.csv <- Chennai petrol & diesel from PPAC (Govt of India)
+#  - data/fuel-daily.csv <- petrol & diesel (Chennai, Delhi, Mumbai, Kolkata) from PPAC (Govt of India)
+#  - data/autolpg-daily.csv <- Auto-LPG, Trichy, from the KR Fuels website (krfuels.com)
 #  - prices.json         <- built from the three files in data/ (what the website shows)
 # Free, runs on GitHub; your computer does not need to be on. "Run workflow" in the Actions tab runs it now.
 on:
@@ -31,6 +32,9 @@ jobs:
         continue-on-error: true
       - name: Petrol and diesel from PPAC
         run: python scripts/update_fuel.py
+        continue-on-error: true
+      - name: Auto-LPG (Trichy) from KR Fuels
+        run: python scripts/update_autolpg.py
         continue-on-error: true
       - name: Build prices.json from data/
         run: python scripts/build_prices.py
