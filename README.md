@@ -7,9 +7,10 @@ Home page of the YouTube channel **saka's corner** ([@sakascorner](https://www.y
 | What | Who | File |
 |---|---|---|
 | Video list | automatic, every day (YouTube feed) | `videos.json` |
-| Chennai petrol & diesel | automatic, every day (PPAC, Govt of India) | `data/fuel-daily.csv` |
+| Petrol & diesel: Chennai, Delhi, Mumbai, Kolkata | automatic, every day (PPAC, Govt of India) | `data/fuel-daily.csv` |
 | Gold 22K, gold 24K, silver (Chennai) | **you**, daily | `data/metals-daily.csv` |
-| LPG cylinder, CNG, Auto-LPG | **you**, monthly | `data/fuel-monthly.csv` |
+| Auto-LPG, Trichy (shown as "Trichy live price") | automatic, every day (KR Fuels website, krfuels.com) | `data/autolpg-daily.csv` |
+| LPG cylinder, CNG | **you**, monthly | `data/fuel-monthly.csv` |
 | The price board on the site (now / 1 / 3 / 5 years ago) | automatic, built from the three files above | `prices.json` (don't edit) |
 
 The automatic part runs on GitHub every morning at 06:00 IST and again a minute after you save a file in `data/`
@@ -49,6 +50,9 @@ An item whose newest value is too old (over 45 days for daily, over 100 days for
 
 The three files in `data/` are the full history: open one on GitHub to see it as a table (with search), or download it
 and open it in Excel. Petrol & diesel go back to 16 June 2017 (every day); LPG, CNG and Auto-LPG to 2021 (monthly).
+In `fuel-daily.csv`, `petrol_per_litre` / `diesel_per_litre` are Chennai; the other metros have their own columns
+(`delhi_petrol_per_litre`, `mumbai_diesel_per_litre`, ...). On the site, visitors pick the city for petrol and diesel
+(the choice is remembered on their phone and shared with the calculator); everything else is Chennai.
 
 ## Other files
 

@@ -151,6 +151,21 @@
     .cellp.now .p { font-size: 30px; } .cellp .pp { font-size: 22px; }
   }
   .src { font: 400 11.5px/1.6 var(--f-mono); color: var(--hud-dim); margin-top: 10px; }
+  /* city choice (petrol & diesel: the four PPAC metros) and the blinking LIVE PRICE badge, light blue */
+  .titlerow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+  .livebadge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #7FDBFF; color: #7FDBFF; background: #0B2433; border-radius: 999px; padding: 5px 13px; font: 700 12px var(--f-mono); letter-spacing: 0.14em; white-space: nowrap; }
+  .livebadge i { width: 9px; height: 9px; border-radius: 50%; background: #7FDBFF; box-shadow: 0 0 10px #7FDBFF; animation: livepulse 1.4s ease-in-out infinite; }
+  @keyframes livepulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.2; transform: scale(0.7); } }
+  @media (prefers-reduced-motion: reduce) { .livebadge i { animation: none; } }
+  .wlive { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; color: #7FDBFF !important; font-weight: 600; }
+  .wlive i { width: 7px; height: 7px; border-radius: 50%; background: #7FDBFF; box-shadow: 0 0 8px #7FDBFF; animation: livepulse 1.4s ease-in-out infinite; flex: none; }
+  @media (prefers-reduced-motion: reduce) { .wlive i { animation: none; } }
+  .cityrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: -8px 0 18px; }
+  .cityrow .lbl { font: 600 12px var(--f-mono); letter-spacing: 0.08em; color: var(--hud-dim); margin-right: 4px; }
+  .citybtn { border: 1px solid var(--hud-edge); background: var(--hud-panel); color: var(--hud-dim); border-radius: 999px; padding: 7px 15px; font: 600 13px var(--f-text); cursor: pointer; }
+  .citybtn:hover { border-color: #7FDBFF; color: var(--hud-white); }
+  .citybtn[aria-pressed="true"] { background: #0E2F44; color: #7FDBFF; border-color: #7FDBFF; box-shadow: 0 0 12px #7FDBFF44; }
+  html[lang="ta"] .livebadge, html[lang="ta"] .cityrow .lbl { letter-spacing: 0.02em; }
   .tools { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; margin-top: 28px; }
   @media (max-width: 800px) { .tools { grid-template-columns: 1fr; } }
   .tool { display: block; text-decoration: none; border-radius: 22px; padding: 22px; border: 2px solid var(--amber); background: linear-gradient(135deg, #1A1205, #0A1520); position: relative; overflow: hidden; }
@@ -237,8 +252,9 @@
   <section class="mc" id="money">
     <div class="wrap">
       <div class="eyebrow" data-i18n="mc.eyebrow">Money Corner · Inflation Tracker</div>
-      <h2 id="board-title">Chennai price board</h2>
+      <div class="titlerow"><h2 id="board-title">Chennai price board</h2><span class="livebadge" title="Petrol and diesel update every morning from PPAC, Govt of India"><i aria-hidden="true"></i><span data-i18n="live">LIVE PRICE</span></span></div>
       <p class="lead" data-i18n="mc.lead">What it costs now, and what it cost 1, 3 and 5 years ago. Petrol and diesel update every day from the Government of India.</p>
+      <div class="cityrow" id="cityrow" role="group" aria-label="City for petrol and diesel prices" data-i18n-aria="city.aria" hidden><span class="lbl" data-i18n="city.lbl">Petrol &amp; diesel in</span><button class="citybtn" data-city="chennai" aria-pressed="true"><span data-i18n="cb.chennai">Chennai · TN</span></button><button class="citybtn" data-city="delhi" aria-pressed="false"><span data-i18n="cb.delhi">Delhi</span></button><button class="citybtn" data-city="mumbai" aria-pressed="false"><span data-i18n="cb.mumbai">Mumbai · MH</span></button><button class="citybtn" data-city="kolkata" aria-pressed="false"><span data-i18n="cb.kolkata">Kolkata · WB</span></button></div>
       <div class="board" id="board-fuel"></div>
       <div class="src" id="src-fuel"></div>
       <div class="board" id="board-metals" style="margin-top:22px" hidden></div>
@@ -272,7 +288,7 @@
 </footer>
 
 <!-- fuel prices as they were when this page was published; prices.json (edited monthly) replaces them on the live site -->
-<script type="application/json" id="price-seed">{"city":"Chennai","fuel":[{"id":"petrol","name":"Petrol","unit":"per litre","auto":"PPAC","source":"PPAC, Govt of India (daily metro prices)","asOf":"2026-11-20","now":107.77,"oneYear":100.8,"threeYears":102.63,"fiveYears":101.4},{"id":"diesel","name":"Diesel","unit":"per litre","auto":"PPAC","source":"PPAC, Govt of India (daily metro prices)","asOf":"2026-11-20","now":99.55,"oneYear":92.39,"threeYears":94.24,"fiveYears":91.43},{"id":"lpg","name":"LPG cylinder","unit":"14.2 kg, domestic","source":"Inflation Tracker price data","asOf":"2026-10","now":957.5,"oneYear":868.5,"threeYears":918.5,"fiveYears":null},{"id":"cng","name":"CNG","unit":"per kg","source":"Inflation Tracker price data","asOf":"2026-10","now":99.5,"oneYear":91.5,"threeYears":85.0,"fiveYears":53.35},{"id":"autolpg","name":"Auto-LPG","unit":"per litre","source":"Inflation Tracker price data","asOf":"2026-10","now":null,"oneYear":56.32,"threeYears":57.38,"fiveYears":56.88}],"metals":[{"id":"gold22","name":"Gold 22K","unit":"per gram","source":"Chennai retail rate","asOf":"","now":null,"oneYear":null,"threeYears":null,"fiveYears":null},{"id":"gold24","name":"Gold 24K","unit":"per gram","source":"Chennai retail rate","asOf":"","now":null,"oneYear":null,"threeYears":null,"fiveYears":null},{"id":"silver","name":"Silver","unit":"per kg","source":"Chennai retail rate","asOf":"","now":null,"oneYear":null,"threeYears":null,"fiveYears":null}]}</script>
+<script type="application/json" id="price-seed">{"city":"Chennai","built":"2026-11-21","note":"Made automatically from the files in data/. Do not edit this file; edit the CSV files instead.","metros":{"chennai":"Chennai","delhi":"Delhi","mumbai":"Mumbai","kolkata":"Kolkata"},"fuel":[{"id":"petrol","name":"Petrol","unit":"per litre","source":"PPAC, Govt of India (daily)","asOf":"2026-11-20","now":107.77,"oneYear":100.8,"threeYears":102.63,"fiveYears":101.4,"cities":{"chennai":{"asOf":"2026-11-20","now":107.77,"oneYear":100.8,"threeYears":102.63,"fiveYears":101.4},"delhi":{"asOf":"2026-11-20","now":102.12,"oneYear":94.77,"threeYears":96.72,"fiveYears":103.97},"mumbai":{"asOf":"2026-11-20","now":111.21,"oneYear":103.5,"threeYears":106.31,"fiveYears":109.98},"kolkata":{"asOf":"2026-11-20","now":113.51,"oneYear":105.41,"threeYears":106.03,"fiveYears":104.67}}},{"id":"diesel","name":"Diesel","unit":"per litre","source":"PPAC, Govt of India (daily)","asOf":"2026-11-20","now":99.55,"oneYear":92.39,"threeYears":94.24,"fiveYears":91.43,"cities":{"chennai":{"asOf":"2026-11-20","now":99.55,"oneYear":92.39,"threeYears":94.24,"fiveYears":91.43},"delhi":{"asOf":"2026-11-20","now":95.2,"oneYear":87.67,"threeYears":89.62,"fiveYears":86.67},"mumbai":{"asOf":"2026-11-20","now":97.83,"oneYear":90.03,"threeYears":94.27,"fiveYears":94.14},"kolkata":{"asOf":"2026-11-20","now":99.82,"oneYear":92.02,"threeYears":92.76,"fiveYears":89.79}}},{"id":"lpg","name":"LPG cylinder","unit":"14.2 kg, domestic","source":"Inflation Tracker price data","asOf":"2026-10","now":957.5,"oneYear":868.5,"threeYears":918.5,"fiveYears":null},{"id":"cng","name":"CNG","unit":"per kg","source":"Inflation Tracker price data","asOf":"2026-10","now":99.5,"oneYear":91.5,"threeYears":85.0,"fiveYears":53.35},{"id":"autolpg","name":"Auto-LPG","unit":"per litre","source":"KR Fuels website, krfuels.com (Trichy live price)","asOf":"2026-11-21","now":79.0,"oneYear":null,"threeYears":null,"fiveYears":null,"where":"Trichy live price · KR Fuels","live":true}],"metals":[{"id":"gold22","name":"Gold 22K","unit":"per gram","source":"Chennai retail rate","asOf":null,"now":null,"oneYear":null,"threeYears":null,"fiveYears":null},{"id":"gold24","name":"Gold 24K","unit":"per gram","source":"Chennai retail rate","asOf":null,"now":null,"oneYear":null,"threeYears":null,"fiveYears":null},{"id":"silver","name":"Silver","unit":"per kg","source":"Chennai retail rate","asOf":null,"now":null,"oneYear":null,"threeYears":null,"fiveYears":null}]}</script>
 
 <!-- the video list as it was when this page was published; videos.json (refreshed daily) replaces it on the live site -->
 <script type="application/json" id="seed">{"channel":"saka's corner","handle":"@sakascorner","channelId":"UCh9xRLefJgg0bUxUQbcUVvg","videos":[{"id":"GSEomS7P63c","title":"Cleaning Tools in English & Tamil for Kids | Saka's Corner","published":"2026-11-20","views":28,"shelf":"learn"},{"id":"WhHYFZtX3t8","title":"Sea Animals for Kids | Learn Ocean Creatures & Names | Saka's Corner","published":"2026-11-20","views":10,"shelf":"learn"},{"id":"qxC8QoRfk44","title":"Crack these Classic Riddles in 40 Seconds!","published":"2024-08-10","views":44,"shelf":"riddles"},{"id":"-ZB8J8sNpJw","title":"Right vs. Wrong: How Your Choices Impact Your Life (Mahabharata Wisdom)","published":"2024-05-12","views":53,"shelf":"stories"},{"id":"Wt7tw-8FT9g","title":"A Heartfelt Tribute to Moms: ‘I Love My Mom’ Song","published":"2024-05-12","views":39,"shelf":"stories"},{"id":"jSNQPuBPh0M","title":"A Mother’s Love: Heartfelt Mother’s Day Tribute","published":"2024-05-12","views":19,"shelf":"stories"},{"id":"deCbsL4VLFc","title":"Innocence Unveiled: A Heartfelt Mother’s Day Duet","published":"2024-05-12","views":23,"shelf":"stories"},{"id":"XbIM65YuuWI","title":"5 Fun Riddles for Kids That Will Trick Your Brain! | Brain Teasers","published":"2024-01-01","views":85,"shelf":"riddles"},{"id":"BFFjhq427vQ","title":"Community Helpers for Kids | Who Are They & What Do They Do? | Saka's Corner","published":"2023-09-09","views":120,"shelf":"learn"},{"id":"vfHUaa7W6Z0","title":"Community Helpers Quiz for Kids | Guess Who Am I? | Saka's Corner","published":"2023-09-03","views":512,"shelf":"riddles"},{"id":"AqFxseJzrg8","title":"Journey through the Digestive System","published":"2023-08-15","views":1130,"shelf":"discover"},{"id":"pjO1W0EVs5U","title":"The Evolution of the Indian National Flag in 60 Seconds","published":"2023-08-14","views":29,"shelf":"discover"},{"id":"Abjdt09J6iA","title":"The Evolution of the Indian National Flag: A History of Pride and Unity","published":"2023-08-14","views":374,"shelf":"discover"},{"id":"d9XuXT25WwU","title":"Can you outsmart the guards & secure your path to freedom? | Logical Riddle - 1","published":"2023-08-07","views":653,"shelf":"riddles"},{"id":"aSe-UqLKPQo","title":"Opposite Words for Kids | A Visual Guide | Saka's Corner","published":"2023-08-06","views":126,"shelf":"learn"}]}</script>
@@ -371,7 +387,12 @@ window.TA_HOME = {
   'item.petrol': 'பெட்ரோல்', 'item.diesel': 'டீசல்', 'item.lpg': 'சமையல் எரிவாயு சிலிண்டர்', 'item.cng': 'CNG', 'item.autolpg': 'ஆட்டோ எல்பிஜி',
   'item.gold22': 'தங்கம் 22K', 'item.gold24': 'தங்கம் 24K', 'item.silver': 'வெள்ளி',
   'unit.per litre': 'ஒரு லிட்டருக்கு', 'unit.per kg': 'ஒரு கிலோவுக்கு', 'unit.14.2 kg, domestic': '14.2 கிலோ, வீட்டு உபயோகம்', 'unit.per gram': 'ஒரு கிராமுக்கு',
-  'city.Chennai': 'சென்னை',
+  'city.Chennai': 'சென்னை', 'city.Delhi': 'டெல்லி', 'city.Mumbai': 'மும்பை', 'city.Kolkata': 'கொல்கத்தா',
+  'live': 'நேரடி விலை', 'live.title': 'பெட்ரோல், டீசல் விலைகள் தினமும் காலை PPAC, இந்திய அரசிடமிருந்து புதுப்பிக்கப்படும்',
+  'city.lbl': 'பெட்ரோல், டீசல் விலை:', 'city.aria': 'பெட்ரோல், டீசல் விலைக்கான நகரம்',
+  'cb.chennai': 'சென்னை · TN', 'cb.delhi': 'டெல்லி', 'cb.mumbai': 'மும்பை · MH', 'cb.kolkata': 'கொல்கத்தா · WB',
+  'only.chennai': 'சென்னை விலை', 'where.Trichy live price · KR Fuels': 'திருச்சி நேரடி விலை · KR Fuels',
+  'src.fuel2': 'பெட்ரோல் & டீசல் ({city}): 1, 3, 5 ஆண்டுகளுக்கு முந்தைய அதே தேதி, தினமும் புதுப்பிப்பு · மற்றவை: சென்னை, குறிப்பிட்ட மாதம் · ஆதாரம்: {sources}.',
   'src.fuel': '{city} · பெட்ரோல் & டீசல்: 1, 3, 5 ஆண்டுகளுக்கு முந்தைய அதே தேதி, தினமும் புதுப்பிப்பு · மற்றவை: குறிப்பிட்ட மாதம் · ஆதாரம்: {sources}.',
   'src.metals': '{city} · {sources} · தகவலுக்காக மட்டும்; நிதி அல்லது முதலீட்டு ஆலோசனை அல்ல.',
   'tk.chg': '{a} ஒரு ஆண்டில் {p}%',
@@ -459,24 +480,37 @@ window.TA_HOME = {
     for (const it of list) {
       const now = num(it.now), past = [[T('col.1y', '1 year ago'), num(it.oneYear)], [T('col.3y', '3 years ago'), num(it.threeYears)], [T('col.5y', '5 years ago'), num(it.fiveYears)]];
       el.insertAdjacentHTML('beforeend',
-        `<div class="prow"><div class="cellp name"><div class="n">${esc(T('item.' + it.id, it.name))}</div><div class="u">${esc(T('unit.' + (it.unit || ''), it.unit || ''))}</div>${it.where ? `<div class="u" style="color:var(--amber)">${esc(it.where)}</div>` : ''}</div>` +
+        `<div class="prow"><div class="cellp name"><div class="n">${esc(T('item.' + it.id, it.name))}</div><div class="u">${esc(T('unit.' + (it.unit || ''), it.unit || ''))}</div>${it.where ? (it.live ? `<div class="u wlive"><i aria-hidden="true"></i>${esc(T('where.' + it.where, it.where))}</div>` : `<div class="u" style="color:var(--amber)">${esc(T('where.' + it.where, it.where))}</div>`) : ''}</div>` +
         `<div class="cellp now"><div class="lab">${T('col.now', 'Now')}</div><div class="p" ${fit(rs2(now), 40)}>${rs2(now)}</div><div class="s">${esc(asOfText(it.asOf))}</div></div>` +
         past.map(([lab, v]) => v > 0 ? `<div class="cellp"><div class="lab">${lab}</div><div class="pp" ${fit(rs2(v), 24)}>${rs2(v)}</div>${change(now, v)}</div>` : `<div class="cellp na"><div class="lab">${lab}</div><div class="pp">—</div><div class="s">${T('nodata', 'no data')}</div></div>`).join('') +
         `</div>`);
     }
     return list;
   }
+  // city for petrol & diesel (PPAC has the four metros); everything else is Chennai. Remembered on this device,
+  // and the calculator reads the same choice.
+  const METROS = { chennai: 'Chennai', delhi: 'Delhi', mumbai: 'Mumbai', kolkata: 'Kolkata' };
+  let CITY = 'chennai';
+  try { const c = localStorage.getItem('sakas-city'); if (METROS[c]) CITY = c; } catch (e) {}
   function renderPrices(p) {
     lastPrices = p;
-    const cityEn = p.city || 'Chennai', city = T('city.' + cityEn, cityEn);
+    const hasCities = (p.fuel || []).some((f) => f.cities && Object.keys(f.cities).length > 1);
+    const cityrow = document.getElementById('cityrow'); cityrow.hidden = !hasCities;
+    const pick = hasCities ? CITY : 'chennai';
+    cityrow.querySelectorAll('.citybtn').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.city === pick)));
+    const cityEn = METROS[pick], city = T('city.' + cityEn, cityEn);
+    // petrol & diesel take the chosen city's figures; other rows say they are Chennai prices when another city is picked
+    const items = (p.fuel || []).map((f) => (f.cities && f.cities[pick] ? { ...f, ...f.cities[pick] }
+      : pick !== 'chennai' && !f.where ? { ...f, where: T('only.chennai', 'Chennai price') } : f));
     document.getElementById('board-title').textContent = T('board.title', '{city} price board', { city });
-    const fuel = board('board-fuel', T('board.fuel', 'Fuel'), p.fuel);
+    document.querySelector('.livebadge').title = T('live.title', 'Petrol and diesel update every morning from PPAC, Govt of India');
+    const fuel = board('board-fuel', T('board.fuel', 'Fuel'), items);
     const sources = [...new Set(fuel.map((f) => f.source).filter(Boolean))];
-    document.getElementById('src-fuel').textContent = T('src.fuel', '{city} · Petrol & diesel: same date 1, 3 and 5 years earlier, updated daily · Others: month shown · Sources: {sources}.', { city, sources: sources.join('; ') });
+    document.getElementById('src-fuel').textContent = T('src.fuel2', 'Petrol & diesel ({city}): same date 1, 3 and 5 years earlier, updated every day · Others: Chennai, month shown · Sources: {sources}.', { city, sources: sources.join('; ') });
     const metals = board('board-metals', T('board.metals', 'Gold & silver'), p.metals);
     const sm = document.getElementById('src-metals'); sm.hidden = !metals.length;
     const ms = [...new Set(metals.map((m) => m.source).filter(Boolean))];
-    sm.textContent = T('src.metals', '{city} · {sources} · For information only, not financial or investment advice.', { city, sources: ms.join('; ') || 'retail rates' });
+    sm.textContent = T('src.metals', '{city} · {sources} · For information only, not financial or investment advice.', { city: T('city.Chennai', 'Chennai'), sources: ms.join('; ') || 'retail rates' });
     // hero ticker: petrol (or the first fuel)
     const f0 = fuel.find((f) => f.id === 'petrol') || fuel[0];
     if (!f0) return;
@@ -488,6 +522,12 @@ window.TA_HOME = {
     tk.style.color = pct == null || Math.abs(pct) <= 0.05 ? 'var(--hud-dim)' : pct > 0 ? 'var(--red)' : '#38E07B';
   }
   let lastPrices = null, lastVideos = null;
+  document.getElementById('cityrow').addEventListener('click', (e) => {
+    const b = e.target.closest('.citybtn'); if (!b || !METROS[b.dataset.city]) return;
+    CITY = b.dataset.city;
+    try { localStorage.setItem('sakas-city', CITY); } catch (err) {}
+    if (lastPrices) renderPrices(lastPrices);
+  });
   let pseed = null;
   try { pseed = JSON.parse(document.getElementById('price-seed').textContent); } catch (e) {}
   if (validPrices(pseed)) renderPrices(pseed);
