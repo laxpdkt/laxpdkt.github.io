@@ -76,10 +76,10 @@
     html:not([lang="ta"]) .hero h1 { font-size: min(8.4vw, 40px); }
     html:not([lang="ta"]) .hero h1 span { white-space: nowrap; }
   }
-  .hero > p { max-width: 58ch; color: var(--soft); font-size: 18px; margin: 14px 0 26px; }
+  .hero > p { max-width: 96ch; color: var(--soft); font-size: 18px; margin: 14px 0 26px; }
   .doors { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   @media (max-width: 760px) { .doors { grid-template-columns: 1fr; } }
-  .door { position: relative; display: flex; flex-direction: column; text-decoration: none; border-radius: 28px; padding: 26px; min-height: 250px; overflow: hidden; transition: transform .2s; }
+  .door { position: relative; display: flex; flex-direction: column; text-decoration: none; border-radius: 28px; padding: 24px 26px; min-height: 212px; overflow: hidden; transition: transform .2s; }
   .door:hover { transform: translateY(-3px); }
   .door h2 { font-size: 34px; font-weight: 800; }
   .door p { margin: 8px 0 0; max-width: 34ch; }
@@ -91,7 +91,7 @@
   @media (max-width: 760px) { .kids p, .kids h2 { max-width: min(34ch, 60%); } }
   .money { background: radial-gradient(ellipse at 70% 30%, #102434 0%, var(--hud-panel) 55%, #061018 100%); color: var(--hud-white); border: 2px solid var(--hud-edge); box-shadow: 0 0 40px #3FD0FF1A, inset 0 0 60px #000A; }
   .money h2 { color: var(--amber); }
-  .money p { color: var(--hud-dim); }
+  .money p { color: var(--hud-dim); max-width: 60ch; }
   .ticker { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin: 0 0 14px; padding: 8px 12px; border: 1px solid var(--hud-edge); border-radius: 12px; background: #061018; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--hud-dim); width: fit-content; max-width: 100%; }
   .ticker .led { font: 800 34px/1 var(--f-led); color: var(--amber); text-shadow: 0 0 12px var(--amber); letter-spacing: 0; }
   .ticker .up { color: var(--red); font-size: 12px; font-weight: 600; }
