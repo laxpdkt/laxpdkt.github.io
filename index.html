@@ -63,7 +63,16 @@
   /* hero: two doors */
   .hero { padding-block: 40px 28px; }
   .hero h1 { font-size: clamp(36px, 6vw, 64px); font-weight: 800; letter-spacing: -0.02em; }
-  .hero h1 .k { color: var(--sky); } .hero h1 .m { color: var(--amber); -webkit-text-stroke: 1px #C98300; }
+  .hero h1 { text-wrap: balance; }
+  .hero h1 .k { color: var(--sky); } .hero h1 .m { color: var(--amber); }
+  /* keep each short sentence on one line, so lines break between sentences, never inside one */
+  @media (min-width: 700px) { .hero h1 .a, .hero h1 .k, .hero h1 .m { white-space: nowrap; } }
+  /* phone: one sentence per line, all starting at the left edge */
+  @media (max-width: 699px) {
+    .hero h1 .a, .hero h1 .k, .hero h1 .m { display: block; }
+    html:not([lang="ta"]) .hero h1 { font-size: min(8.4vw, 40px); }
+    html:not([lang="ta"]) .hero h1 span { white-space: nowrap; }
+  }
   .hero > p { max-width: 58ch; color: var(--soft); font-size: 18px; margin: 14px 0 26px; }
   .doors { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   @media (max-width: 760px) { .doors { grid-template-columns: 1fr; } }
@@ -205,7 +214,7 @@
   <!-- ===================== two doors ===================== -->
   <div class="wrap hero">
     <div class="eyebrow">YouTube · @sakascorner</div>
-    <h1 data-i18n="hero.h1" data-html>Learn something new. <span class="k">Laugh at a riddle.</span> <span class="m">Do the maths.</span></h1>
+    <h1 data-i18n="hero.h1" data-html><span class="a">Learn something new.</span> <span class="k">Laugh at a riddle.</span> <span class="m">Do the maths.</span></h1>
     <p data-i18n="hero.p">Learning videos for kids in English and Tamil, riddles and stories for the whole family, and Money Corner: the everyday cost of living in Chennai, worked out in rupees.</p>
     <div class="doors">
       <a class="door kids" href="#kids">
@@ -368,7 +377,7 @@ window.I18N = (function () {
 window.TA_HOME = {
   'nav.newest': 'புதியவை', 'nav.kids': 'குழந்தைகள் பகுதி', 'nav.riddles': 'புதிர்கள்', 'nav.money': 'பணம் பகுதி',
   'sub': 'சப்ஸ்கிரைப்', 'lang.more': 'மேலும் மொழிகள்',
-  'hero.h1': 'புதிதாகக் கற்போம். <span class="k">புதிருக்குச் சிரிப்போம்.</span> <span class="m">கணக்குப் போடுவோம்.</span>',
+  'hero.h1': '<span class="a">புதிதாகக் கற்போம்.</span> <span class="k">புதிருக்குச் சிரிப்போம்.</span> <span class="m">கணக்குப் போடுவோம்.</span>',
   'hero.p': 'ஆங்கிலத்திலும் தமிழிலும் குழந்தைகளுக்கான கற்றல் வீடியோக்கள், குடும்பம் முழுவதற்குமான புதிர்கள், கதைகள், மேலும் பணம் பகுதி: சென்னையின் அன்றாடச் செலவுகள், ரூபாயில் கணக்கிட்டு.',
   'kids.eyebrow': 'குழந்தைகள் பகுதி', 'kids.h2': 'சாகாவுடன் கற்போம்', 'kids.go': 'பார்க்கத் தொடங்குங்கள் →',
   'kids.count': '{n} வீடியோக்கள்: சொற்கள், விலங்குகள், சமூக உதவியாளர்கள் மற்றும் பல, ஆங்கிலத்திலும் தமிழிலும், கூடவே புதிர்களும் கதைகளும்.',
