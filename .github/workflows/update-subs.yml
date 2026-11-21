@@ -1,5 +1,5 @@
 name: Update YouTube subscriber count
-# Every 3 hours: asks YouTube for the channel's subscriber count and saves it in channel.json (shown as the odometer on sakas.in).
+# Once a day at 4:30 AM IST: asks YouTube for the channel's subscriber count and saves it in channel.json (shown as the odometer on sakas.in).
 # Needs the repository secret YT_API_KEY (Settings > Secrets and variables > Actions). The key never goes into the website.
 on:
   schedule:
