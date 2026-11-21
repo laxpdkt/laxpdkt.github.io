@@ -139,7 +139,7 @@
   .mc .wrap { position: relative; z-index: 1; }
   .mc .eyebrow { color: var(--glow); font-family: var(--f-mono); }
   .mc h2 { color: var(--amber); font-size: clamp(30px, 4.5vw, 46px); font-weight: 800; }
-  .mc .lead { color: var(--hud-dim); max-width: 60ch; margin: 10px 0 24px; }
+  .mc .lead { color: var(--hud-dim); max-width: none; margin: 10px 0 24px; }
   /* price boards: one row per item, columns now / 1y / 3y / 5y */
   .board { display: grid; gap: 10px; }
   .board h3 { font: 700 20px var(--f-text); color: var(--hud-white); margin: 6px 0 2px; }
@@ -403,7 +403,7 @@
 
       <div class="tools">
         <a class="tool" href="calculator/index.html">
-          <div class="mini"><small data-i18n="tool.mini">YOU KEEP</small>₹48</div>
+          <div class="mini"><small data-i18n="tool.mini">ACTUAL EARNINGS</small>₹48</div>
           <h3 data-i18n="tool.h3">Taxi Wallet Calculator</h3>
           <p data-i18n="tool.p">Enter a ride: fare, empty pickup km, fuel. Watch the trip run on the map and see what the driver really keeps, per km and per hour. Or work out a full day, insurance included.</p>
           <span class="btn" data-i18n="tool.btn">Try it with your numbers</span>
@@ -538,7 +538,7 @@ window.TA_HOME = {
   'src.fuel': '{city} · பெட்ரோல் & டீசல்: 1, 3, 5 ஆண்டுகளுக்கு முந்தைய அதே தேதி, தினமும் புதுப்பிப்பு · மற்றவை: குறிப்பிட்ட மாதம் · ஆதாரம்: {sources}.',
   'src.metals': '{city} · {sources} · தகவலுக்காக மட்டும்; நிதி அல்லது முதலீட்டு ஆலோசனை அல்ல.',
   'tk.chg': '{a} ஒரு ஆண்டில் {p}%',
-  'tool.mini': 'கையில் மிச்சம்', 'tool.h3': 'டாக்ஸி வாலட் கால்குலேட்டர்',
+  'tool.mini': 'உண்மையான வருமானம்', 'tool.h3': 'டாக்ஸி வாலட் கால்குலேட்டர்',
   'tool.p': 'ஒரு சவாரியை உள்ளிடுங்கள்: கட்டணம், காலியாக ஓடிய பிக்கப் கி.மீ, எரிபொருள். வரைபடத்தில் பயணம் ஓடுவதைப் பாருங்கள், ஓட்டுநருக்கு உண்மையில் எவ்வளவு மிஞ்சுகிறது என்று கி.மீ-க்கும் மணிக்கும் பாருங்கள். அல்லது காப்பீடு உட்பட ஒரு முழு நாளைக் கணக்கிடுங்கள்.',
   'tool.btn': 'உங்கள் எண்களுடன் முயன்று பாருங்கள்',
   'soon.h3': 'சேனலில் விரைவில்',
@@ -619,7 +619,7 @@ window.TA_HOME = {
     const el = document.getElementById(id), list = (items || []).filter(usable);
     el.hidden = !list.length; el.innerHTML = '';
     if (!list.length) return list;
-    el.insertAdjacentHTML('beforeend', `<h3>${esc(title)}</h3><div class="prow headrow"><div></div><div>${T('col.now', 'Now')}</div><div>${T('col.1y', '1 year ago')}</div><div>${T('col.3y', '3 years ago')}</div><div>${T('col.5y', '5 years ago')}</div></div>`);
+    el.insertAdjacentHTML('beforeend', `${title ? `<h3>${esc(title)}</h3>` : ''}<div class="prow headrow"><div></div><div>${T('col.now', 'Now')}</div><div>${T('col.1y', '1 year ago')}</div><div>${T('col.3y', '3 years ago')}</div><div>${T('col.5y', '5 years ago')}</div></div>`);
     for (const it of list) {
       const now = num(it.now), past = [[T('col.1y', '1 year ago'), num(it.oneYear)], [T('col.3y', '3 years ago'), num(it.threeYears)], [T('col.5y', '5 years ago'), num(it.fiveYears)]];
       el.insertAdjacentHTML('beforeend',
@@ -647,7 +647,7 @@ window.TA_HOME = {
       : pick !== 'chennai' && !f.where ? { ...f, where: T('only.chennai', 'Chennai price') } : f));
     document.getElementById('board-title').textContent = T('board.title', '{city} price board', { city });
     document.querySelector('.livebadge').title = T('live.title', 'Petrol and diesel update every morning from PPAC, Govt of India');
-    const fuel = board('board-fuel', T('board.fuel', 'Fuel'), items);
+    const fuel = board('board-fuel', '', items);   // no 'Fuel' heading: the rows say petrol, diesel...
     const sources = [...new Set(fuel.map((f) => f.source).filter(Boolean))];
     document.getElementById('src-fuel').textContent = T('src.fuel2', 'Petrol & diesel ({city}): same date 1, 3 and 5 years earlier, updated every day · Others: Chennai, month shown · Sources: {sources}.', { city, sources: sources.join('; ') });
     const metals = board('board-metals', T('board.metals', 'Gold & silver'), p.metals);
