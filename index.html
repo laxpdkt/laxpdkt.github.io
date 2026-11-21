@@ -197,6 +197,18 @@
   footer .row { display: flex; flex-wrap: wrap; gap: 14px 28px; justify-content: space-between; align-items: center; }
   footer .mail { flex-basis: 100%; } footer .mail a { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+  /* YouTube subscriber odometer with a goal bar (count from channel.json, refreshed every 3 hours) */
+  .subs { display: flex; align-items: center; gap: 16px 20px; flex-wrap: wrap; margin: 0 0 24px; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 6px 18px #16203A12; }
+  .subs-odo { display: inline-flex; gap: 4px; padding: 8px; background: #000; border: 2px solid #2C333B; border-radius: 12px; }
+  .subs-odo span { width: 30px; height: 44px; display: grid; place-items: center; background: linear-gradient(#141414, #333 50%, #141414); color: #fff; font: 800 28px var(--f-led); border-radius: 5px; }
+  .subs-odo span:last-child { background: linear-gradient(#5a0d0d, #a01818 50%, #5a0d0d); }
+  .subs-info { flex: 1; min-width: 200px; }
+  .subs-l { font: 600 12px var(--f-text); letter-spacing: 0.12em; text-transform: uppercase; color: var(--soft); }
+  .subs-bar { height: 10px; background: #E7EEFB; border-radius: 999px; overflow: hidden; margin: 8px 0 6px; }
+  .subs-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #7DDFEE, #FD5295, #F7C552); border-radius: 999px; transition: width 1.2s ease-out; }
+  .subs-goal { font-weight: 700; font-size: 15px; }
+  html[lang="ta"] .subs-l { letter-spacing: 0.02em; text-transform: none; }
+  @media (prefers-reduced-motion: reduce) { .subs-bar i { transition: none; } }
 </style>
 </head>
 <body>
@@ -219,6 +231,11 @@
     <div class="eyebrow">YouTube · @sakascorner</div>
     <h1 data-i18n="hero.h1" data-html><span class="a">Learn something new.</span> <span class="k">Laugh at a riddle.</span> <span class="m">Do the maths.</span></h1>
     <p data-i18n="hero.p">Learning videos for kids in English and Tamil, riddles and stories for the whole family, and Money Corner: the everyday cost of living in Chennai, worked out in rupees.</p>
+    <div class="subs" id="subs" hidden>
+      <div class="subs-odo" id="subs-odo" aria-hidden="true"></div>
+      <div class="subs-info"><div class="subs-l" data-i18n="subs.l">YouTube subscribers</div><div class="subs-bar" aria-hidden="true"><i id="subs-fill"></i></div><div class="subs-goal" id="subs-goal" aria-live="polite"></div></div>
+      <a class="sub" href="https://www.youtube.com/@sakascorner?sub_confirmation=1" target="_blank" rel="noopener" data-i18n="sub">Subscribe</a>
+    </div>
     <div class="doors">
       <a class="door kids" href="#kids">
         <svg class="blobs" viewBox="0 0 260 260" aria-hidden="true">
@@ -379,7 +396,7 @@ window.I18N = (function () {
 // Tamil for the home page. Keys match data-i18n="..." in the page and I18N.t('...') in the script below.
 window.TA_HOME = {
   'nav.newest': 'புதியவை', 'nav.kids': 'குழந்தைகள் பகுதி', 'nav.riddles': 'புதிர்கள்', 'nav.money': 'பணம் பகுதி',
-  'sub': 'சப்ஸ்கிரைப்', 'lang.more': 'மேலும் மொழிகள்',
+  'sub': 'சப்ஸ்கிரைப்', 'subs.l': 'YouTube சந்தாதாரர்கள்', 'subs.goal': '{n} / {g} · {g}-ஐ எட்ட உதவுங்கள்!', 'subs.aria': '{n} YouTube சந்தாதாரர்கள்', 'lang.more': 'மேலும் மொழிகள்',
   'hero.h1': '<span class="a">புதிதாகக் கற்போம்.</span> <span class="k">புதிருக்குச் சிரிப்போம்.</span> <span class="m">கணக்குப் போடுவோம்.</span>',
   'hero.p': 'ஆங்கிலத்திலும் தமிழிலும் குழந்தைகளுக்கான கற்றல் வீடியோக்கள், குடும்பம் முழுவதற்குமான புதிர்கள், கதைகள், மேலும் பணம் பகுதி: சென்னையின் அன்றாடச் செலவுகள், ரூபாயில் கணக்கிட்டு.',
   'kids.eyebrow': 'குழந்தைகள் பகுதி', 'kids.h2': 'சாகாவுடன் கற்போம்', 'kids.go': 'பார்க்கத் தொடங்குங்கள் →',
@@ -557,8 +574,26 @@ window.TA_HOME = {
   if (location.protocol.startsWith('http')) {
     fetch('videos.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.videos && d.videos.length) render(d); }).catch(() => {});
   }
+  // subscriber odometer: rolls up to the count, bar shows progress to the next round goal (200, 500, 1K, 2K, 5K...)
+  let lastSubs = null;
+  const GOALS = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000];
+  function renderSubs(c, animate) {
+    const n = Number(c && c.subscribers); if (!Number.isFinite(n) || n < 0) return;
+    lastSubs = c;
+    const goal = GOALS.find((g) => g > n) || n, box = document.getElementById('subs'), odo = document.getElementById('subs-odo');
+    box.hidden = false;
+    box.setAttribute('aria-label', T('subs.aria', '{n} YouTube subscribers', { n: n.toLocaleString('en-IN') }));
+    document.getElementById('subs-goal').textContent = T('subs.goal', '{n} / {g} · help us reach {g}!', { n: n.toLocaleString('en-IN'), g: goal.toLocaleString('en-IN') });
+    const show = (v) => { odo.innerHTML = String(Math.round(v)).padStart(4, '0').split('').map((d) => '<span>' + d + '</span>').join(''); };
+    const still = !animate || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    if (still) show(n); else { const t0 = performance.now(); const step = (t) => { const k = Math.min(1, (t - t0) / 1200); show(n * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
+    requestAnimationFrame(() => { document.getElementById('subs-fill').style.width = Math.min(100, (n / goal) * 100).toFixed(1) + '%'; });
+  }
+  if (location.protocol.startsWith('http')) {
+    fetch('channel.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then((c) => renderSubs(c, true)).catch(() => {});
+  }
   if (window.I18N) {
-    I18N.onChange(() => { if (lastVideos) render(lastVideos); if (lastPrices) renderPrices(lastPrices); });
+    I18N.onChange(() => { if (lastVideos) render(lastVideos); if (lastPrices) renderPrices(lastPrices); if (lastSubs) renderSubs(lastSubs, false); });
     I18N.init(window.TA_HOME);
   }
 })();

@@ -1,0 +1,33 @@
+name: Update YouTube subscriber count
+# Every 3 hours: asks YouTube for the channel's subscriber count and saves it in channel.json (shown as the odometer on sakas.in).
+# Needs the repository secret YT_API_KEY (Settings > Secrets and variables > Actions). The key never goes into the website.
+on:
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch: {}
+# the job may only change files in this repository
+permissions:
+  contents: write
+concurrency:
+  group: update-site
+  cancel-in-progress: false
+jobs:
+  subs:
+    runs-on: ubuntu-latest
+    steps:
+      # pinned to an exact, checked version
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Subscriber count from YouTube
+        env:
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
+        run: python3 scripts/update_subs.py
+      - name: Save if it changed
+        run: |
+          if [ -n "$(git status --porcelain channel.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add channel.json
+            git commit -m "Update subscriber count"
+            git pull --rebase --autostash
+            git push
+          fi
