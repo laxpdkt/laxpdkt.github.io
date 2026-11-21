@@ -1,6 +1,6 @@
 """Refresh channel.json with saka's corner's YouTube subscriber count (for the subscriber strip on sakas.in).
 
-Runs every 3 hours on GitHub (.github/workflows/update-subs.yml). Needs the repository secret YT_API_KEY
+Runs once a day at 4:30 AM IST on GitHub (.github/workflows/update-subs.yml). Needs the repository secret YT_API_KEY
 (a YouTube Data API v3 key). The key is only used here, on GitHub's servers; it is never put in the website.
 Without the key, or if YouTube hides the count, the file is left as it is.
 

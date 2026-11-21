@@ -3,7 +3,7 @@ name: Update YouTube subscriber count
 # Needs the repository secret YT_API_KEY (Settings > Secrets and variables > Actions). The key never goes into the website.
 on:
   schedule:
-    - cron: "17 */3 * * *"
+    - cron: "0 23 * * *"   # 23:00 UTC = 4:30 AM IST, once a day
   workflow_dispatch: {}
 # the job may only change files in this repository
 permissions:
