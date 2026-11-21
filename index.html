@@ -200,8 +200,8 @@
   /* ===== YouTube subscriber strip (count from channel.json, refreshed every 3 hours by .github/workflows/update-subs.yml).
      Max 720 px, centred, shaped like the background picture. Blue magic lamp, odometer line, and the SAKAS gang. ===== */
   .subs { margin: 0 0 18px; }   /* same width as the Kids Corner + Money Corner cards below */
-  .hall { position: relative; aspect-ratio: 2000 / 650; border-radius: 18px; overflow: hidden; container-type: inline-size; box-shadow: 0 10px 28px #0B122244;
-    background: #0b0b0d url(assets/subs-bg.webp) center top / 100% auto no-repeat; }
+  .hall { position: relative; aspect-ratio: 2000 / 480; border-radius: 18px; overflow: hidden; container-type: inline-size; box-shadow: 0 10px 28px #0B122244;
+    background: #0b0b0d url(assets/subs-bg.webp) center top / 100% auto no-repeat;   /* top kept, bottom cropped */ }
   /* blue magic lamp, hanging in the middle */
   .lamp { position: absolute; left: 50%; top: 0; width: 0; height: 0; z-index: 1; }
   .lamp .cord { position: absolute; left: -.2cqw; top: 0; width: .4cqw; height: 2cqw; background: #1C262C; }
@@ -213,7 +213,7 @@
   .sparks i { position: absolute; bottom: 30%; width: .8cqw; height: .8cqw; border-radius: 50%; background: #CFFBFF; box-shadow: 0 0 1.3cqw .4cqw #7DF3FF; opacity: 0; animation: rise 5s ease-in-out infinite; }
   @keyframes rise { 0% { transform: translate(0, 0) scale(.4); opacity: 0; } 15% { opacity: .95; } 50% { transform: translate(2cqw, -10cqw) scale(1); opacity: .8; } 85% { opacity: .4; } 100% { transform: translate(-1.5cqw, -22cqw) scale(.5); opacity: 0; } }
   /* the odometer: SUBSCRIBERS plate + rolling wheels in a metal housing */
-  .sodo { position: absolute; z-index: 2; left: 50%; top: 9.6cqw; transform: translateX(-50%); display: flex; align-items: center; gap: 1.2cqw; padding: 1.1cqw 1.4cqw; border-radius: 1.6cqw;
+  .sodo { position: absolute; z-index: 2; left: 50%; top: 8.7cqw; transform: translateX(-50%); display: flex; align-items: center; gap: 1.2cqw; padding: 1.1cqw 1.4cqw; border-radius: 1.6cqw;
     background: linear-gradient(#2B2F35, #121417); box-shadow: inset 0 .3cqw 0 #ffffff22, inset 0 -.4cqw 0 #00000088, 0 1.6cqw 3cqw #000B, 0 0 3cqw #3FD0FF22; }
   .wh.ltr i { color: #9FF4FF; text-shadow: 0 0 .8cqw #3FD0FF; } .wh.gap { background: transparent; width: .9cqw; } .wh.dash { background: transparent; }
   .sodo .wheels { display: flex; gap: .22cqw; padding: .55cqw; background: #000; border-radius: 1cqw; box-shadow: inset 0 0 1cqw #000; }
@@ -227,17 +227,17 @@
   @keyframes shove { 0%, 41.5% { transform: none; } 43% { transform: translateX(-1cqw) rotate(-15deg); } 44.5% { transform: translateX(-.55cqw) rotate(-8deg); }
     46.5% { transform: translateX(.3cqw) rotate(5deg); } 48% { transform: translateX(-.12cqw) rotate(-2deg); } 49.5%, 100% { transform: none; } }
   /* forecast: one line at the bottom, logo colours */
-  .eta { position: absolute; left: 50%; top: 17.8cqw; transform: translateX(-50%); z-index: 7; width: max-content; white-space: nowrap;
+  .eta { position: absolute; left: 50%; top: 16.7cqw; transform: translateX(-50%); z-index: 7; width: max-content; white-space: nowrap;
     font: 700 max(8.5px, 1.75cqw)/1.3 var(--f-text); color: #F7C552; text-shadow: 0 0 1cqw #000, 0 0 .3cqw #000; }
   .eta b { color: #FD5295; } .eta i { font-style: normal; color: #7DDFEE; }
   /* the SAKAS gang */
-  .mon { position: absolute; width: 7.4%; aspect-ratio: 60 / 72; z-index: 5; }
+  .mon { position: absolute; width: 6.4%; aspect-ratio: 60 / 72; z-index: 5; }
   .mon svg { width: 100%; height: 100%; overflow: visible; }
   .mon * { transform-box: view-box; }
-  .m-s1 { left: 4%; bottom: 1.5%; } .m-k { left: 62.5%; bottom: 70.5%; } .m-a2 { left: 79.5%; bottom: 1.5%; } .m-s2 { left: 89.8%; bottom: 1.5%; }
-  .m-a1 { left: 19.5%; top: 8cqw; z-index: 6; transform-origin: 50% -150%; animation: a1y 20s ease-in-out infinite; }
+  .m-s1 { left: 4%; bottom: 2%; } .m-k { left: 62.5%; bottom: 63.8%; } .m-a2 { left: 79.5%; bottom: 2%; } .m-s2 { left: 89.8%; bottom: 2%; }
+  .m-a1 { left: 20.5%; top: 7.4cqw; z-index: 6; transform-origin: 50% -150%; animation: a1y 20s ease-in-out infinite; }
   .m-a1::before { content: ""; position: absolute; left: calc(50% - .2cqw); bottom: 92%; width: .4cqw; height: 30cqw; background: linear-gradient(#8C7A55, #C9B48A); }
-  @keyframes a1y { 0.00% { transform: translateY(-7.2cqw) rotate(3deg); } 4.25% { transform: translateY(-7.2cqw) rotate(3deg); } 8.50% { transform: translateY(-7.2cqw) rotate(-3deg); } 12.75% { transform: translateY(-7.2cqw) rotate(3deg); } 17.00% { transform: translateY(-5.76cqw) rotate(3deg); } 21.25% { transform: translateY(-2.7cqw) rotate(3deg); } 25.50% { transform: translateY(0.0cqw) rotate(-3deg); } 29.75% { transform: translateY(0.0cqw) rotate(-3deg); } 34.00% { transform: translateY(0.0cqw) rotate(3deg); } 38.25% { transform: translateY(0.0cqw) rotate(3deg); } 42.50% { transform: translateY(0.0cqw) rotate(-3deg); } 46.75% { transform: translateY(0.0cqw) rotate(-3deg); } 51.00% { transform: translateY(0.0cqw) rotate(3deg); } 55.25% { transform: translateY(0.0cqw) rotate(3deg); } 59.50% { transform: translateY(0.0cqw) rotate(-3deg); } 63.75% { transform: translateY(-0.9cqw) rotate(-3deg); } 68.00% { transform: translateY(-3.96cqw) rotate(3deg); } 72.25% { transform: translateY(-7.02cqw) rotate(3deg); } 76.50% { transform: translateY(-7.2cqw) rotate(-3deg); } 80.75% { transform: translateY(-7.2cqw) rotate(-3deg); } 85.00% { transform: translateY(-7.2cqw) rotate(3deg); } 89.25% { transform: translateY(-7.2cqw) rotate(3deg); } 93.50% { transform: translateY(-7.2cqw) rotate(-3deg); } 97.75% { transform: translateY(-7.2cqw) rotate(3deg); } 100.00% { transform: translateY(-7.2cqw) rotate(3deg); } }
+  @keyframes a1y { 0.00% { transform: translateY(-6.20cqw) rotate(3deg); } 4.25% { transform: translateY(-6.20cqw) rotate(3deg); } 8.50% { transform: translateY(-6.20cqw) rotate(-3deg); } 12.75% { transform: translateY(-6.20cqw) rotate(3deg); } 17.00% { transform: translateY(-4.96cqw) rotate(3deg); } 21.25% { transform: translateY(-2.33cqw) rotate(3deg); } 25.50% { transform: translateY(0.00cqw) rotate(-3deg); } 29.75% { transform: translateY(0.00cqw) rotate(-3deg); } 34.00% { transform: translateY(0.00cqw) rotate(3deg); } 38.25% { transform: translateY(0.00cqw) rotate(3deg); } 42.50% { transform: translateY(0.00cqw) rotate(-3deg); } 46.75% { transform: translateY(0.00cqw) rotate(-3deg); } 51.00% { transform: translateY(0.00cqw) rotate(3deg); } 55.25% { transform: translateY(0.00cqw) rotate(3deg); } 59.50% { transform: translateY(0.00cqw) rotate(-3deg); } 63.75% { transform: translateY(-0.78cqw) rotate(-3deg); } 68.00% { transform: translateY(-3.41cqw) rotate(3deg); } 72.25% { transform: translateY(-6.04cqw) rotate(3deg); } 76.50% { transform: translateY(-6.20cqw) rotate(-3deg); } 80.75% { transform: translateY(-6.20cqw) rotate(-3deg); } 85.00% { transform: translateY(-6.20cqw) rotate(3deg); } 89.25% { transform: translateY(-6.20cqw) rotate(3deg); } 93.50% { transform: translateY(-6.20cqw) rotate(-3deg); } 97.75% { transform: translateY(-6.20cqw) rotate(3deg); } 100.00% { transform: translateY(-6.20cqw) rotate(3deg); } }
   .mon .lid { transform: scaleY(.45); animation: blinkB 5s ease-in-out infinite; }
   @keyframes blinkB { 0%, 90%, 100% { transform: scaleY(.45); } 94% { transform: scaleY(1.05); } }
   .mon .pupil { animation: lookUp 7s ease-in-out infinite; }
