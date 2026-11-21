@@ -197,6 +197,7 @@
         <option value="cng" data-i18n="opt.cng">CNG</option>
         <option value="petrol" data-i18n="opt.petrol">Petrol</option>
         <option value="diesel" data-i18n="opt.diesel">Diesel</option>
+        <option value="autolpg" data-i18n="opt.autolpg">Auto-LPG (Trichy price)</option>
         <option value="ev" data-i18n="opt.ev">EV (home charging)</option>
       </select>
       <div class="two">
@@ -266,7 +267,8 @@
           <option value="petrol" selected data-i18n="opt.petrol">Petrol</option>
           <option value="diesel" data-i18n="opt.diesel">Diesel</option>
           <option value="cng" data-i18n="opt.cng">CNG</option>
-          <option value="ev" data-i18n="opt.ev">EV (home charging)</option>
+          <option value="autolpg" data-i18n="opt.autolpg">Auto-LPG (Trichy price)</option>
+        <option value="ev" data-i18n="opt.ev">EV (home charging)</option>
         </select>
         <div class="two">
           <div><label for="d-km" data-i18n="lbl.d.km">Total km</label><input id="d-km" type="number" inputmode="decimal" min="0" step="1" value="150"></div>
@@ -286,7 +288,7 @@
           <div><label for="d-misc" data-i18n="lbl.d.misc">Miscellaneous ₹ a day</label><input id="d-misc" type="number" inputmode="decimal" min="0" step="5" value="60" placeholder="60"></div>
         </div>
         <div class="note" data-i18n="d.misc.note">Miscellaneous: small daily spends like tea ₹30 and bajji ₹30 (example ₹60). Add parking, toll, water or car wash if you pay them.</div>
-        <div class="note" data-i18n="d.note">Earnings, km and costs start with the video's worked example; mileages are examples (petrol 15, diesel 19, CNG 24, EV 7); fuel prices are the latest prices (petrol and diesel for the city you pick). Put in your own day.</div>
+        <div class="note" data-i18n="d.note">Earnings, km and costs start with the video's worked example; mileages are examples (petrol 15, diesel 19, CNG 24, Auto-LPG 13.5, EV 7); fuel prices are the latest prices (petrol and diesel for the city you pick). Put in your own day.</div>
       </div>
       <div class="screen">
         <div class="tag mono"><span data-i18n="day.slip">Day slip</span><span id="d-phase" style="color:var(--amber)"></span></div>
@@ -306,7 +308,7 @@
   </section>
 
   <footer>
-    <div id="foot-prices" data-i18n="foot.1">Fuel prices come from the sakas.in price board: petrol and diesel from PPAC, Govt of India, for Chennai, Delhi, Mumbai or Kolkata (updated daily); CNG from Inflation Tracker price data (monthly); EV home charging ₹11.80/unit (TNERC top domestic slab). Mileages are examples. Change any number to yours.</div>
+    <div id="foot-prices" data-i18n="foot.1">Fuel prices come from the sakas.in price board: petrol and diesel from PPAC, Govt of India, for Chennai, Delhi, Mumbai or Kolkata (updated daily); CNG from Inflation Tracker price data (monthly); Auto-LPG from the KR Fuels website (Trichy price, daily); EV home charging ₹11.80/unit (TNERC top domestic slab). Mileages are examples. Change any number to yours.</div>
     <div data-i18n="foot.2">For information only, not financial advice. Your costs differ. Inflation Tracker.</div>
   </footer>
 </div>
@@ -385,7 +387,8 @@ window.TA_CALC = {
   'lbl.d.ins': 'காப்பீடு ₹ ஒரு ஆண்டுக்கு', 'lbl.d.days': 'காப்பீட்டைப் பிரிக்கும் நாட்கள்',
   'lbl.mil': 'மைலேஜ் {u}', 'lbl.realmil': 'உண்மையான மைலேஜ் {u}', 'lbl.price': 'விலை ₹/{u}',
   'u.km/kg': 'கி.மீ/கிலோ', 'u.km/L': 'கி.மீ/லி', 'u.km/unit': 'கி.மீ/யூனிட்', 'u.kg': 'கிலோ', 'u.L': 'லி', 'u.unit': 'யூனிட்',
-  'opt.cng': 'CNG', 'opt.petrol': 'பெட்ரோல்', 'opt.diesel': 'டீசல்', 'opt.ev': 'EV (வீட்டில் சார்ஜிங்)',
+  'opt.cng': 'CNG', 'opt.petrol': 'பெட்ரோல்', 'opt.diesel': 'டீசல்', 'opt.ev': 'EV (வீட்டில் சார்ஜிங்)', 'opt.autolpg': 'ஆட்டோ LPG (திருச்சி விலை)',
+  'city.trichy': 'திருச்சி', 'src.KR Fuels website': 'KR Fuels இணையதளம்',
   'r.note': 'மைலேஜ், பராமரிப்பு, இலக்கு ஆகியவை உதாரணங்கள். உங்களுடையதை உள்ளிடுங்கள்.', 'go': 'இந்தப் பயணத்தை ஓட்டிப் பாருங்கள்',
   'p.live': 'நேரடி விலை', 'p.live.t': 'தினமும் காலை புதுப்பிக்கப்படும்', 'p.city': 'விலைக்கான நகரம்',
   'city.chennai': 'சென்னை', 'city.delhi': 'டெல்லி', 'city.mumbai': 'மும்பை', 'city.kolkata': 'கொல்கத்தா', 'p.type': '· உங்கள் விலையையும் உள்ளிடலாம்', 'p.mine': 'உங்கள் விலை', 'p.latest': 'சமீபத்திய {city}: ₹{p}', 'p.use': '↺ சமீபத்திய விலை',
@@ -408,13 +411,13 @@ window.TA_CALC = {
   'lbl.d.misc': 'இதர செலவுகள் ₹ ஒரு நாளுக்கு', 'd.misc.note': 'இதர செலவுகள்: டீ ₹30, பஜ்ஜி ₹30 போன்ற சின்னச் சின்ன தினசரி செலவுகள் (உதாரணம் ₹60). பார்க்கிங், டோல், தண்ணீர், கார் வாஷ் செலவு இருந்தால் அதையும் சேர்த்துக்கொள்ளுங்கள்.',
   'w.misc': 'இதர செலவுகள்', 'w.misc.sub': 'டீ, பஜ்ஜி, ஒரு நாளுக்கு',
   'day.sheet': 'நாள் தாள்', 'day.sub': 'உங்கள் முழு நாள்', 'day.slip': 'நாள் சீட்டு',
-  'd.note': 'வருமானம், கி.மீ, செலவுகள் வீடியோவின் உதாரணத்திலிருந்து தொடங்குகின்றன; மைலேஜ் உதாரணங்கள் (பெட்ரோல் 15, டீசல் 19, CNG 24, EV 7); எரிபொருள் விலைகள் சமீபத்திய விலைகள் (பெட்ரோல், டீசல்: நீங்கள் தேர்ந்தெடுக்கும் நகரம்). உங்கள் நாளை உள்ளிடுங்கள்.',
+  'd.note': 'வருமானம், கி.மீ, செலவுகள் வீடியோவின் உதாரணத்திலிருந்து தொடங்குகின்றன; மைலேஜ் உதாரணங்கள் (பெட்ரோல் 15, டீசல் 19, CNG 24, ஆட்டோ LPG 13.5, EV 7); எரிபொருள் விலைகள் சமீபத்திய விலைகள் (பெட்ரோல், டீசல்: நீங்கள் தேர்ந்தெடுக்கும் நகரம்). உங்கள் நாளை உள்ளிடுங்கள்.',
   'w.tdp': 'உண்மையான தினசரி லாபம்', 'w.pay': 'ஆப் நிகர வருமானம்', 'w.emi': 'EMI / வாடகை', 'w.perday': 'ஒரு நாளுக்கு', 'w.ins': 'காப்பீடு',
   'w.pay.sub': '{e} − {c}% ஆப் கமிஷன்', 'w.fuel.sub': '{f}: {km} கி.மீ ÷ {m} {mu} × {p}/{pu}', 'w.mnt.sub': '{km} கி.மீ × {p}/கி.மீ',
   'w.ins.sub': 'ஆண்டுக்கு {v} ÷ {d} நாட்கள்', 'w.lossnote': 'நாளுக்கு {v} நஷ்டம்', 'w.keepnote': 'எல்லாச் செலவுக்கும் பிறகு நாளுக்கு மிச்சம்',
   'ph.loss': 'நஷ்டத்தில் ஓடுகிறது', 'ph.profit': 'லாபத்தில்',
   's.fuel.sub': '{km} கி.மீ ÷ {m} {mu} × {p}', 's.mnt.sub': '{km} கி.மீ × {p}',
-  'foot.1': 'எரிபொருள் விலைகள் sakas.in விலைப் பலகையிலிருந்து: பெட்ரோல், டீசல் PPAC, இந்திய அரசு — சென்னை, டெல்லி, மும்பை அல்லது கொல்கத்தா (தினமும்); CNG, Inflation Tracker தரவு (மாதம் ஒருமுறை); EV வீட்டு சார்ஜிங் ₹11.80/யூனிட் (TNERC உயர் பிரிவு). மைலேஜ் உதாரணங்கள். எந்த எண்ணையும் உங்களுடையதாக மாற்றலாம்.',
+  'foot.1': 'எரிபொருள் விலைகள் sakas.in விலைப் பலகையிலிருந்து: பெட்ரோல், டீசல் PPAC, இந்திய அரசு — சென்னை, டெல்லி, மும்பை அல்லது கொல்கத்தா (தினமும்); CNG, Inflation Tracker தரவு (மாதம் ஒருமுறை); ஆட்டோ LPG, KR Fuels இணையதளம் (திருச்சி விலை, தினமும்); EV வீட்டு சார்ஜிங் ₹11.80/யூனிட் (TNERC உயர் பிரிவு). மைலேஜ் உதாரணங்கள். எந்த எண்ணையும் உங்களுடையதாக மாற்றலாம்.',
   'foot.2': 'தகவலுக்காக மட்டும்; நிதி ஆலோசனை அல்ல. உங்கள் செலவுகள் மாறுபடலாம். Inflation Tracker.',
 };
 </script>
@@ -434,13 +437,15 @@ window.TA_CALC = {
     cng: { mil: 18, mu: 'km/kg', price: 99.50, pu: 'kg', asOf: '2026-10', src: 'Inflation Tracker data' },
     petrol: { mil: 15, mu: 'km/L', price: 107.77, pu: 'L', asOf: '2026-11-20', src: 'PPAC, Govt of India' },
     diesel: { mil: 19, mu: 'km/L', price: 99.55, pu: 'L', asOf: '2026-11-20', src: 'PPAC, Govt of India' },
+    // Auto-LPG: KR Fuels' daily Trichy price (krfuels.com); mileage about 0.9 x petrol (KR Fuels' own rule of thumb)
+    autolpg: { mil: 13.5, mu: 'km/L', price: 79.00, pu: 'L', asOf: '2026-11-21', src: 'KR Fuels website', place: 'trichy' },
     ev: { mil: 7, mu: 'km/unit', price: 11.80, pu: 'unit', asOf: '', src: 'TNERC top domestic slab' },
   };
   // petrol & diesel in the four PPAC metros (built-in fallback; ../prices.json refreshes it every day on the site).
   // The chosen city is shared with the sakas.in price board (same 'sakas-city' setting on this device).
   const CITY_P = {"chennai":{"petrol":{"price":107.77,"asOf":"2026-11-20"},"diesel":{"price":99.55,"asOf":"2026-11-20"}},"delhi":{"petrol":{"price":102.12,"asOf":"2026-11-20"},"diesel":{"price":95.2,"asOf":"2026-11-20"}},"mumbai":{"petrol":{"price":111.21,"asOf":"2026-11-20"},"diesel":{"price":97.83,"asOf":"2026-11-20"}},"kolkata":{"petrol":{"price":113.51,"asOf":"2026-11-20"},"diesel":{"price":99.82,"asOf":"2026-11-20"}}};
   const CITIES = ['chennai', 'delhi', 'mumbai', 'kolkata'];
-  const CITY_EN = { chennai: 'Chennai', delhi: 'Delhi', mumbai: 'Mumbai', kolkata: 'Kolkata' };
+  const CITY_EN = { chennai: 'Chennai', delhi: 'Delhi', mumbai: 'Mumbai', kolkata: 'Kolkata', trichy: 'Trichy' };
   let CITY = 'chennai';
   try { const c = localStorage.getItem('sakas-city'); if (CITY_EN[c]) CITY = c; } catch (e) {}
   const cityName = (c) => T('city.' + c, CITY_EN[c]);
@@ -451,10 +456,10 @@ window.TA_CALC = {
   const hasCity = (fuel) => fuel === 'petrol' || fuel === 'diesel';
   const liveFor = (box) => {
     const fuel = $(box + '-veh').value, v = VEH[fuel], c = hasCity(fuel) && CITY_P[CITY] && CITY_P[CITY][fuel];
-    return c ? { ...v, price: c.price, asOf: c.asOf, city: CITY } : { ...v, city: 'chennai' };
+    return c ? { ...v, price: c.price, asOf: c.asOf, city: CITY } : { ...v, city: v.place || 'chennai' };
   };
   // Full day: real-traffic mileage per fuel, from the video's four-fuel comparison (examples, editable)
-  const DAY_MIL = { petrol: 15, diesel: 19, cng: 24, ev: 7 };
+  const DAY_MIL = { petrol: 15, diesel: 19, cng: 24, autolpg: 13.5, ev: 7 };
   const applyDayFuel = (fill) => {
     const v = VEH[$('d-veh').value];
     $('d-mil-l').textContent = T('lbl.realmil', 'Real mileage {u}', { u: U(v.mu) }); $('d-price-l').textContent = T('lbl.price', 'Price ₹/{u}', { u: U(v.pu) });
@@ -467,7 +472,7 @@ window.TA_CALC = {
     // petrol & diesel: a city dropdown (the four PPAC metros); CNG and EV are Chennai prices
     const place = hasCity($(box + '-veh').value)
       ? `<select class="citysel" aria-label="${T('p.city', 'City for the price')}">${CITIES.filter((c) => CITY_P[c]).map((c) => `<option value="${c}"${c === CITY ? ' selected' : ''}>${cityName(c)}</option>`).join('')}</select>`
-      : `<span>${cityName('chennai')}</span>`;
+      : `<span>${cityName(v.city)}</span>`;
     el.innerHTML = mine
       ? `<span class="mine">${T('p.mine', 'YOUR PRICE')}</span><span>${T('p.latest', 'Latest {city}: ₹{p}', { city: cityName(v.city), p: v.price.toFixed(2) })}</span><button type="button" data-box="${box}">${T('p.use', '↺ Use latest price')}</button>`
       : `<span class="live" title="${T('p.live.t', 'Updated every morning')}"><i aria-hidden="true"></i>${T('p.live', 'LIVE PRICE')}</span>${place}<span>${when}</span><span>${T('p.type', '· type to use your own')}</span>`;
@@ -698,7 +703,7 @@ window.TA_CALC = {
       if (!p || !Array.isArray(p.fuel)) return;
       for (const f of p.fuel) {
         const v = VEH[f.id], now = Number(f.now);
-        if (v && now > 0) { v.price = now; v.asOf = f.asOf || v.asOf; v.src = String(f.source || v.src).replace(/\s*\((daily|pump price)\)\s*$/i, ''); }
+        if (v && now > 0) { v.price = now; v.asOf = f.asOf || v.asOf; if (!v.place) v.src = String(f.source || v.src).replace(/\s*\((daily|pump price)\)\s*$/i, ''); }
         for (const [c, cv] of Object.entries(f.cities || {})) if (CITY_EN[c] && Number(cv.now) > 0) (CITY_P[c] = CITY_P[c] || {})[f.id] = { price: Number(cv.now), asOf: cv.asOf };
       }
       for (const box of ['r', 'd']) { if (PRICE[box].mine) priceTag(box); else useLive(box); }
