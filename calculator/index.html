@@ -102,7 +102,7 @@
   /* results row: trip slip + efficiency */
   .results { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; position: relative; z-index: 1; }
   @media (max-width: 760px) { .results { grid-template-columns: 1fr; } }
-  .slip { background: var(--paper); color: var(--ink); border-radius: 6px 6px 0 0; padding: 14px 18px 22px; font-family: var(--f-mono); position: relative; box-shadow: 0 10px 24px #0008; }
+  .slip { background: var(--paper); color: var(--ink); border-radius: 6px 6px 0 0; padding: 50px 18px 22px; font-family: var(--f-mono); position: relative; box-shadow: 0 10px 24px #0008; }
   .slip::after { content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 10px; background: linear-gradient(-45deg, transparent 7px, var(--paper) 0) 0 0 / 14px 10px, linear-gradient(45deg, transparent 7px, var(--paper) 0) 0 0 / 14px 10px; }
   .slip h3 { margin: 0 0 8px; font: 600 12px var(--f-mono); letter-spacing: 0.16em; color: #6B7480; }
   .slip .ln { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px dashed #C9C2B3; font-size: 14px; font-variant-numeric: tabular-nums; }
@@ -111,7 +111,7 @@
   .slip .neg { color: #B42318; } .slip .pos { color: #0E7A3C; }
   .slip .tot { border-bottom: 0; padding-top: 10px; font-size: 17px; font-weight: 600; }
   .slip .tot b { font-size: 22px; }
-  .stamp { position: absolute; right: 14px; top: 6px; transform: rotate(-9deg); border: 4px solid var(--amber); border-radius: 10px; padding: 2px 10px; background: #1A1205E6; color: var(--amber); font-family: var(--f-led); font-weight: 800; font-size: 26px; opacity: 0; transition: opacity .3s, transform .3s; }
+  .stamp { position: absolute; right: 14px; top: 4px; z-index: 2; transform: rotate(-9deg); border: 4px solid var(--amber); border-radius: 10px; padding: 2px 10px; background: #1A1205E6; color: var(--amber); font-family: var(--f-led); font-weight: 800; font-size: 26px; opacity: 0; transition: opacity .3s, transform .3s; }
   .stamp.on { opacity: 1; transform: rotate(-9deg) scale(1); }
   .stamp.loss { border-color: var(--red); color: var(--red); }
   .eff { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
@@ -166,7 +166,7 @@
     </div>
     <div class="cell in" id="c-in"><div class="mono" id="l-in">Fare in</div><div class="led" id="v-in">+₹0</div></div>
     <div class="cell out" id="c-out"><div class="mono" data-i18n="w.out">Costs out</div><div class="led" id="v-out">−₹0</div></div>
-    <div class="cell net" id="c-net"><div class="mono" data-i18n="w.keep">You keep</div><div class="led" id="v-net">₹0</div></div>
+    <div class="cell net" id="c-net"><div class="mono" data-i18n="w.keep">Actual earnings</div><div class="led" id="v-net">₹0</div></div>
   </div>
 
   <div class="tabs">
@@ -235,8 +235,8 @@
           <div class="ln"><span><span data-i18n="s.cut">App cut</span><small id="s-cut-s"></small></span><b class="neg" id="s-cut"></b></div>
           <div class="ln"><span><span data-i18n="s.fuel">Fuel</span><small id="s-fuel-s"></small></span><b class="neg" id="s-fuel"></b></div>
           <div class="ln"><span><span data-i18n="s.mnt">Upkeep</span><small id="s-mnt-s"></small></span><b class="neg" id="s-mnt"></b></div>
-          <div class="ln tot"><span data-i18n="s.keep">You keep</span><b id="s-net"></b></div>
-          <div class="stamp" id="stamp">KEEPS ₹0</div>
+          <div class="ln tot"><span data-i18n="s.keep">Actual earnings</span><b id="s-net"></b></div>
+          <div class="stamp" id="stamp">EARNING ₹0</div>
         </div>
         <div class="eff">
           <div class="tile"><div class="mono" data-i18n="e.pkm">Profit / km</div><div class="led" id="e-pkm">₹0</div></div>
@@ -381,7 +381,7 @@ window.I18N = (function () {
 // Tamil for the calculator. Keys match data-i18n="..." in the page and T('...') in the script below.
 window.TA_CALC = {
   'lang.more': 'மேலும் மொழிகள்',
-  'w.live': 'நேரடி வாலட்', 'w.mode.ride': 'ஒரு சவாரி', 'w.mode.day': 'முழு நாள்', 'w.in.ride': 'வந்த கட்டணம்', 'w.in.day': 'ஆப் வருமானம்', 'w.out': 'செலவுகள்', 'w.keep': 'கையில் மிச்சம்',
+  'w.live': 'நேரடி வாலட்', 'w.mode.ride': 'ஒரு சவாரி', 'w.mode.day': 'முழு நாள்', 'w.in.ride': 'வந்த கட்டணம்', 'w.in.day': 'ஆப் வருமானம்', 'w.out': 'செலவுகள்', 'w.keep': 'உண்மையான வருமானம்',
   'h1': 'டாக்ஸி வாலட் கால்குலேட்டர்', 'h1.sub': 'ஒரு கேப் ஓட்டுநருக்கு உண்மையில் எவ்வளவு மிஞ்சுகிறது. உங்கள் எண்களை உள்ளிட்டு, பயணம் ஓடுவதைப் பாருங்கள்.',
   'tab.ride': 'ஒரு சவாரி', 'tab.day': 'முழு நாள்',
   'trip.sheet': 'பயணத் தாள்', 'trip.enter': 'உங்கள் சவாரியை உள்ளிடுங்கள்',
@@ -403,8 +403,8 @@ window.TA_CALC = {
   'st.enter': 'பயணத் தாளில் ஒரு சவாரியை உள்ளிடுங்கள்', 'st.empty': 'பிக்கப்புக்குக் காலியாகச் செல்கிறார்', 'st.on': 'பயணி உள்ளே · மீட்டர் ஓடுகிறது',
   'st.done': '{km} கி.மீ ஓட்டினார் · {e} கி.மீ-க்கு யாரும் கட்டணம் தரவில்லை ({p}%)',
   'tag.empty': 'காலி', 'tag.passenger': 'பயணி',
-  'slip': 'பயணச் சீட்டு', 's.fare': 'கட்டணம்', 's.cut': 'ஆப் கமிஷன்', 's.fuel': 'எரிபொருள்', 's.mnt': 'பராமரிப்பு', 's.keep': 'கையில் மிச்சம்',
-  's.cut.sub': '{f}-ல் {c}%', 'stamp.keep': 'மிச்சம் {v}', 'stamp.loss': 'நஷ்டம் {v}',
+  'slip': 'பயணச் சீட்டு', 's.fare': 'கட்டணம்', 's.cut': 'ஆப் கமிஷன்', 's.fuel': 'எரிபொருள்', 's.mnt': 'பராமரிப்பு', 's.keep': 'உண்மையான வருமானம்',
+  's.cut.sub': '{f}-ல் {c}%', 'stamp.keep': 'வருமானம் {v}', 'stamp.loss': 'நஷ்டம் {v}',
   'e.pkm': 'லாபம் / கி.மீ', 'e.hr': 'ஒரு மணிக்கு (தோராயம்)', 'e.burn': 'எரிபொருள் / கி.மீ', 'e.op': 'செலவு / கி.மீ',
   'v.loss': 'நஷ்டமான சவாரி', 'v.loss.s': 'கிடைப்பதைவிட {v} அதிகம் செலவாகிறது.',
   'v.good': 'நல்ல சவாரி', 'v.good.s': 'உங்கள் {t}/கி.மீ இலக்கை {d} தாண்டியது.',
@@ -418,7 +418,7 @@ window.TA_CALC = {
   'd.note': 'வருமானம், கி.மீ, செலவுகள் வீடியோவின் உதாரணத்திலிருந்து தொடங்குகின்றன; மைலேஜ் உதாரணங்கள் (பெட்ரோல் 15, டீசல் 19, CNG 24, ஆட்டோ LPG 13.5, EV 7); எரிபொருள் விலைகள் சமீபத்திய விலைகள் (பெட்ரோல், டீசல்: நீங்கள் தேர்ந்தெடுக்கும் நகரம்). உங்கள் நாளை உள்ளிடுங்கள்.',
   'w.tdp': 'உண்மையான தினசரி லாபம்', 'w.pay': 'ஆப் நிகர வருமானம்', 'w.emi': 'EMI / வாடகை', 'w.perday': 'ஒரு நாளுக்கு', 'w.ins': 'காப்பீடு',
   'w.pay.sub': '{e} − {c}% ஆப் கமிஷன்', 'w.fuel.sub': '{f}: {km} கி.மீ ÷ {m} {mu} × {p}/{pu}', 'w.mnt.sub': '{km} கி.மீ × {p}/கி.மீ',
-  'w.ins.sub': 'ஆண்டுக்கு {v} ÷ {d} நாட்கள்', 'w.lossnote': 'நாளுக்கு {v} நஷ்டம்', 'w.keepnote': 'எல்லாச் செலவுக்கும் பிறகு நாளுக்கு மிச்சம்',
+  'w.ins.sub': 'ஆண்டுக்கு {v} ÷ {d} நாட்கள்', 'w.lossnote': 'நாளுக்கு {v} நஷ்டம்', 'w.keepnote': 'எல்லாச் செலவுக்கும் பிறகு நாளுக்கு உண்மையான வருமானம்',
   'ph.loss': 'நஷ்டத்தில் ஓடுகிறது', 'ph.profit': 'லாபத்தில்',
   's.fuel.sub': '{km} கி.மீ ÷ {m} {mu} × {p}', 's.mnt.sub': '{km} கி.மீ × {p}',
   'foot.1': 'எரிபொருள் விலைகள் sakas.in விலைப் பலகையிலிருந்து: பெட்ரோல், டீசல் PPAC, இந்திய அரசு — சென்னை, டெல்லி, மும்பை அல்லது கொல்கத்தா (தினமும்); CNG, Inflation Tracker தரவு (மாதம் ஒருமுறை); ஆட்டோ LPG, KR Fuels இணையதளம் (திருச்சி விலை, தினமும்); EV வீட்டு சார்ஜிங் ₹11.80/யூனிட் (TNERC உயர் பிரிவு). மைலேஜ் உதாரணங்கள். எந்த எண்ணையும் உங்களுடையதாக மாற்றலாம்.',
@@ -561,7 +561,7 @@ window.TA_CALC = {
     $('s-fuel').textContent = '−' + rs(R.fuel); $('s-fuel-s').textContent = T('s.fuel.sub', '{km} km ÷ {m} {mu} × {p}', { km: +R.km.toFixed(1), m: R.mil, mu: U(R.unit), p: rs(R.price) });
     $('s-mnt').textContent = '−' + rs(R.maint); $('s-mnt-s').textContent = T('s.mnt.sub', '{km} km × {p}', { km: +R.km.toFixed(1), p: rs(R.upk) });
     $('s-net').textContent = rs(R.net); $('s-net').className = R.net < 0 ? 'neg' : 'pos';
-    $('stamp').textContent = R.net < 0 ? T('stamp.loss', 'LOSS {v}', { v: rs0(-R.net) }) : T('stamp.keep', 'KEEPS {v}', { v: rs0(R.net) }); $('stamp').classList.toggle('loss', R.net < 0);
+    $('stamp').textContent = R.net < 0 ? T('stamp.loss', 'LOSS {v}', { v: rs0(-R.net) }) : T('stamp.keep', 'EARNING {v}', { v: rs0(R.net) }); $('stamp').classList.toggle('loss', R.net < 0);
     $('e-pkm').textContent = rs(R.perKm); $('e-pkm').style.color = R.perKm >= R.tgt ? 'var(--green)' : R.perKm < 0 ? 'var(--red)' : 'var(--white)';
     $('e-hr').textContent = rs0(R.perHr);
     $('e-burn').textContent = rs(R.burn);
@@ -628,8 +628,8 @@ window.TA_CALC = {
     $('w-emi').textContent = '−' + rs0(emi);
     $('w-ins').textContent = '−' + rs0(insD); $('w-ins-s').textContent = T('w.ins.sub', '{v} a year ÷ {d} days', { v: rs0(ins), d: days });
     $('w-true').textContent = rs0(tp); $('w-true').className = tp < 0 ? 'neg' : 'pos';
-    $('w-note').textContent = tp < 0 ? T('w.lossnote', 'A loss of {v} a day', { v: rs0(-tp) }) : T('w.keepnote', 'Kept per day, after every cost');
-    $('d-stamp').textContent = tp < 0 ? T('stamp.loss', 'LOSS {v}', { v: rs0(-tp) }) : T('stamp.keep', 'KEEPS {v}', { v: rs0(tp) }); $('d-stamp').classList.toggle('loss', tp < 0);
+    $('w-note').textContent = tp < 0 ? T('w.lossnote', 'A loss of {v} a day', { v: rs0(-tp) }) : T('w.keepnote', 'Actual earnings per day, after every cost');
+    $('d-stamp').textContent = tp < 0 ? T('stamp.loss', 'LOSS {v}', { v: rs0(-tp) }) : T('stamp.keep', 'EARNING {v}', { v: rs0(tp) }); $('d-stamp').classList.toggle('loss', tp < 0);
     $('d-phase').textContent = tp < 0 ? T('ph.loss', 'Running at a loss') : T('ph.profit', 'In profit');
     return { earn, out: earn - tp };
   }
