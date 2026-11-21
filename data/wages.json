@@ -1,0 +1,55 @@
+{
+  "_note": "Driver pay for Saka Fare check = state minimum wage for drivers per day (monthly / 26, as the notifications say) / paid minutes per day. Average of zones where a state has zones. Only figures read from the official government document are used; anything not verified is left out and the app asks the user to type the driver's daily wage. Central-sphere wages are not used (different and higher).",
+  "lastChecked": "2026-11-21",
+  "paidMinsPerDay": 360,
+  "fuelAdjust": "Optional: wage x (petrol price today / petrol price on the order's effective date) for the same city, from data/fuel-daily.csv (PPAC). A rough way to bring an old official wage up to date; not a government figure.",
+  "states": {
+    "Delhi": {
+      "category": "Skilled (applies to all scheduled employments)",
+      "monthly": 22411,
+      "dailyWage": 862,
+      "includesDA": true,
+      "petrolAtEffective": 94.77, "petrolCity": "delhi",
+      "zones": "Single rate for all of Delhi",
+      "effectiveFrom": "2025-04-01",
+      "notification": "F.No.(142)/02/MW/VII/Part file/211-241 dated 15/04/2025, Office of the Commissioner (Labour), Govt of NCT of Delhi",
+      "officialUrl": "https://labour.delhi.gov.in/sites/default/files/Labour/generic_multiple_files/da15april2025.pdf",
+      "note": "Newest order on the official Minimum Wages page (page checked 2026-11-21, site updated 19/11/2026).",
+      "verified": true
+    },
+    "Tamil Nadu": {
+      "category": "Public Motor Transport - 'Driver including those employed by Tourist Car Operators'",
+      "monthlyBasic": 11306,
+      "dailyBasic": 434.85,
+      "petrolAtEffective": 102.63, "petrolCity": "chennai",
+      "includesDA": false,
+      "zones": "Single rate for the whole state (no zones in this schedule)",
+      "daRule": "DA = Rs.65.65 per month for every point the average Chennai CPI (base 2001=100) of the previous Jan-Dec is above 161; revised every 1 April",
+      "effectiveFrom": "2023-01-25",
+      "notification": "G.O.(2D) No.01, Labour Welfare and Skill Development (J1) Department, dated 02.01.2023; TN Govt Gazette dated 25.01.2023",
+      "officialUrl": "https://labour.tn.gov.in/pdf/GO/G.O.%282D%29-No.01-Public-Motor-Transport.pdf",
+      "pending": "2026 DA amount (needs the Commissioner of Labour's DA notice or the 2025 average Chennai CPI). Until then the app uses basic only and says so.",
+      "verified": true
+    },
+    "Maharashtra": {
+      "category": "Public Motor Transport (सार्वजनिक मोटार वाहतुकीच्या संबंधातील कामधंदा) - Skilled-B 'other drivers' (इतर वाहनचालक)",
+      "monthlyBasicZone1": 18975,
+      "monthlyBasicZone2": 18320,
+      "monthlyBasic": 18647.5,
+      "dailyBasic": 717.21,
+      "petrolAtEffective": 103.44, "petrolCity": "mumbai",
+      "includesDA": false,
+      "zones": "Average of Zone 1 (all municipal corporations and A-class councils, incl. Mumbai) and Zone 2 (rest of the state)",
+      "daRule": "Special allowance linked to the average CPI of 11 Maharashtra centres, revised 1 January and 1 July",
+      "effectiveFrom": "2024-10-14",
+      "notification": "किवेअ-२०१५/१९३/प्र.क्र.१९४/कामगार७ dated 14 October 2024, Industries, Energy, Labour and Mining Department",
+      "officialUrl": "https://mahakamgar.maharashtra.gov.in/Upload/PDF/Employment%20in%20Public%20Motor%20Transport%20Final%20Notification.pdf",
+      "pending": "Special allowance for Jul-Dec 2026 (not yet on the official site; Jan-Jun 2026 list dated 04/02/2026 is there). Until then the app uses basic only and says so.",
+      "verified": true
+    },
+    "West Bengal": {
+      "verified": false,
+      "pending": "Official site wblc.gov.in refused the connection; nothing could be checked. App asks the user to type the daily wage."
+    }
+  }
+}
