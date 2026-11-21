@@ -1,0 +1,46 @@
+name: Update videos and prices
+# Runs by itself every day at 06:00 IST, and a minute after you save a change to a file in data/ on GitHub.
+#  - videos.json         <- your YouTube channel feed
+#  - data/fuel-daily.csv <- Chennai petrol & diesel from PPAC (Govt of India)
+#  - prices.json         <- built from the three files in data/ (what the website shows)
+# Free, runs on GitHub; your computer does not need to be on. "Run workflow" in the Actions tab runs it now.
+on:
+  schedule:
+    - cron: "30 0 * * *"
+  push:
+    paths:
+      - "data/**"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: update-site
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pypdf==5.1.0
+      # each step can fail on its own (a site is down or changed); the others still run and old data is kept
+      - name: Videos from YouTube
+        run: python scripts/update_videos.py
+        continue-on-error: true
+      - name: Petrol and diesel from PPAC
+        run: python scripts/update_fuel.py
+        continue-on-error: true
+      - name: Build prices.json from data/
+        run: python scripts/build_prices.py
+      - name: Save if anything changed
+        run: |
+          if [ -n "$(git status --porcelain videos.json prices.json data)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add videos.json prices.json data
+            git commit -m "Update videos and prices"
+            git pull --rebase --autostash
+            git push
+          fi
