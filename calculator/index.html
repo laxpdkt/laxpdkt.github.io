@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Taxi Wallet Calculator</title>
+<link rel="icon" type="image/png" href="../assets/logo-96.png">
+<link rel="apple-touch-icon" href="../assets/logo-192.png">
+<meta property="og:title" content="Taxi Wallet Calculator · saka's corner">
+<meta property="og:image" content="https://sakas.in/assets/logo.png">
+<meta name="description" content="How much does a cab driver really keep? Enter one ride or a full day: fuel, empty km, commission, maintenance, EMI and insurance. From the Inflation Tracker channel.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@400;600&family=Poppins:wght@500;700;800&family=Noto+Sans+Tamil:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Taxi Wallet look (night cab dashboard, same as the video): one dark theme on purpose.
+     Layout: live wallet bar on top, then the dash screen (route map + meters) beside the trip sheet. */
+  :root {
+    color-scheme: dark;
+    --bg: #070B10; --dash: #0E141B; --panel: #0A1520; --panel2: #0D2232; --edge: #1D3446; --glow: #3FD0FF;
+    --amber: #FFB02E; --amber-dim: #7A5416; --red: #FF4D4D; --green: #38E07B; --grey: #C9D3DC; --white: #EEF4F8; --dim: #8AA0B2;
+    --paper: #F4EFE4; --ink: #1B2430; --taxi: #F6C21C; --road: #183248;
+    --f-text: Poppins, 'Segoe UI', system-ui, sans-serif; --f-led: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif; --f-mono: 'IBM Plex Mono', Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: radial-gradient(ellipse at 50% 0%, #0E1720 0%, var(--bg) 60%) fixed, var(--bg); color: var(--white); font: 15px/1.45 var(--f-text); }
+  .wrap { max-width: 1240px; margin: 0 auto; padding-block: 18px 36px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
+  .mono { font-family: var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; }
+  .led { font-family: var(--f-led); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+
+  /* ---- live wallet bar */
+  .wallet { display: grid; grid-template-columns: auto 1fr 1fr 1fr; align-items: stretch; background: linear-gradient(180deg, #05090D, #0A1219); border: 2px solid var(--amber-dim); border-radius: 20px; box-shadow: 0 0 28px #FFB02E22, inset 0 0 30px #000; overflow: hidden; }
+  .wallet .id { display: flex; gap: 14px; align-items: center; padding: 14px 20px; }
+  .wallet .id svg { flex: 0 0 auto; }
+  .wallet .id .mono { font-size: 12px; line-height: 1.7; color: var(--amber); }
+  .wallet .id .mono span { color: var(--dim); }
+  .cell { border-left: 2px solid var(--edge); padding: 12px 20px; min-width: 0; }
+  .cell .mono { font-size: 12px; color: var(--dim); }
+  .cell .led { font-size: clamp(34px, 5vw, 60px); margin-top: 4px; transition: text-shadow .2s, color .2s; }
+  .in .led { color: var(--green); text-shadow: 0 0 12px var(--green); }
+  .out .led { color: var(--red); text-shadow: 0 0 12px var(--red); }
+  .net .led { color: var(--amber); text-shadow: 0 0 12px var(--amber); }
+  .net.loss .led { color: var(--red); text-shadow: 0 0 14px var(--red); }
+  .flash .led { text-shadow: 0 0 34px currentColor; }
+  @media (max-width: 760px) { .wallet { grid-template-columns: 1fr 1fr 1fr; } .wallet .id { grid-column: 1 / -1; padding-bottom: 4px; } .cell { border-left: 0; border-top: 2px solid var(--edge); padding: 10px 12px; } }
+
+  /* ---- tabs */
+  .tabs { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+  .tabs h1 { margin: 0; font: 800 clamp(20px, 3vw, 28px)/1.1 var(--f-text); text-wrap: balance; }
+  .tabs h1 small { display: block; font: 500 13px var(--f-text); color: var(--dim); margin-top: 4px; }
+  .tablist { display: inline-flex; background: var(--dash); border: 2px solid var(--edge); border-radius: 999px; padding: 4px; }
+  .tablist button { border: 0; background: transparent; padding: 8px 16px; border-radius: 999px; cursor: pointer; color: var(--dim); font-family: var(--f-mono); font-size: 13px; letter-spacing: 0.12em; }
+  .tablist button[aria-selected="true"] { background: var(--amber); color: #1A1000; font-weight: 600; }
+
+  /* ---- dash screen panels */
+  .screen { position: relative; background: radial-gradient(ellipse at 50% 35%, #102434 0%, var(--panel) 60%, #061018 100%); border: 2px solid var(--edge); border-radius: 24px; box-shadow: 0 0 40px #3FD0FF1A, inset 0 0 60px #000A; padding: 18px; min-width: 0; overflow: hidden; }
+  .screen::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, #FFFFFF05 0 2px, transparent 2px 5px); }
+  .screen > .tag { font-size: 12px; color: var(--glow); margin-bottom: 12px; display: flex; justify-content: space-between; gap: 8px; }
+  .ride-grid { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 980px) { .ride-grid { grid-template-columns: 1fr; } }
+
+  /* trip sheet (inputs) */
+  .sheet label { display: block; font: 600 11px var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); margin: 12px 0 5px; }
+  .sheet .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sheet input, .sheet select { width: 100%; min-width: 0; background: #061018; border: 2px solid #24404F; border-radius: 10px; color: var(--white); padding: 9px 11px; font: 700 22px var(--f-led); letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+  .sheet select { font: 600 14px var(--f-mono); padding: 11px; }
+  .sheet input:focus { border-color: var(--amber); outline: none; box-shadow: 0 0 0 3px #FFB02E33; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+  .chip { border: 1px solid #24404F; background: #0D2232; border-radius: 8px; padding: 3px 9px; font: 600 12px var(--f-mono); cursor: pointer; color: var(--white); }
+  .chip:hover { border-color: var(--amber); }
+  .note { font: 400 11.5px/1.5 var(--f-mono); color: var(--dim); margin-top: 10px; }
+  /* live price tag under a price box: "today's Chennai price" or "your price" + a button back to today's */
+  .ptag { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 7px; font: 400 11.5px/1.45 var(--f-mono); color: var(--dim); }
+  .ptag .live { color: var(--green); font-weight: 600; letter-spacing: 0.06em; }
+  .ptag .live::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); margin-right: 6px; vertical-align: 1px; }
+  .ptag .mine { color: var(--amber); font-weight: 600; letter-spacing: 0.06em; }
+  .ptag button { border: 1px solid #24404F; background: #0D2232; color: var(--glow); border-radius: 8px; padding: 3px 9px; cursor: pointer; font: 600 11.5px var(--f-mono); }
+  .ptag button:hover { border-color: var(--glow); }
+  .go { margin-top: 14px; width: 100%; border: 0; border-radius: 12px; padding: 12px; cursor: pointer; background: var(--amber); color: #1A1000; font: 800 16px var(--f-text); }
+
+  /* nav screen: map + meters */
+  .nav { display: grid; grid-template-columns: 1fr 200px; gap: 14px; align-items: start; }
+  @media (max-width: 640px) { .nav { grid-template-columns: 1fr; } }
+  .map { width: 100%; height: auto; display: block; border-radius: 16px; background: #0B1B28; border: 2px solid #163246; }
+  .meters { display: grid; gap: 10px; }
+  @media (max-width: 640px) { .meters { grid-template-columns: repeat(3, 1fr); } }
+  .meter .mono { font-size: 11px; color: var(--dim); }
+  .meter .led { font-size: 46px; }
+  .status { position: relative; z-index: 1; margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+  .status .mono { font-size: 12px; color: var(--grey); }
+  .replay { border: 2px solid var(--edge); background: #0D2232; border-radius: 10px; padding: 6px 12px; cursor: pointer; font: 600 12px var(--f-mono); letter-spacing: 0.1em; color: var(--glow); }
+
+  /* results row: trip slip + efficiency */
+  .results { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; position: relative; z-index: 1; }
+  @media (max-width: 760px) { .results { grid-template-columns: 1fr; } }
+  .slip { background: var(--paper); color: var(--ink); border-radius: 6px 6px 0 0; padding: 14px 18px 22px; font-family: var(--f-mono); position: relative; box-shadow: 0 10px 24px #0008; }
+  .slip::after { content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 10px; background: linear-gradient(-45deg, transparent 7px, var(--paper) 0) 0 0 / 14px 10px, linear-gradient(45deg, transparent 7px, var(--paper) 0) 0 0 / 14px 10px; }
+  .slip h3 { margin: 0 0 8px; font: 600 12px var(--f-mono); letter-spacing: 0.16em; color: #6B7480; }
+  .slip .ln { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px dashed #C9C2B3; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .slip .ln small { display: block; color: #6B7480; font-size: 11px; }
+  .slip .ln b { white-space: nowrap; }
+  .slip .neg { color: #B42318; } .slip .pos { color: #0E7A3C; }
+  .slip .tot { border-bottom: 0; padding-top: 10px; font-size: 17px; font-weight: 600; }
+  .slip .tot b { font-size: 22px; }
+  .stamp { position: absolute; right: 14px; top: 6px; transform: rotate(-9deg); border: 4px solid var(--amber); border-radius: 10px; padding: 2px 10px; background: #1A1205E6; color: var(--amber); font-family: var(--f-led); font-weight: 800; font-size: 26px; opacity: 0; transition: opacity .3s, transform .3s; }
+  .stamp.on { opacity: 1; transform: rotate(-9deg) scale(1); }
+  .stamp.loss { border-color: var(--red); color: var(--red); }
+  .eff { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
+  .tile { background: var(--panel2); border: 2px solid var(--edge); border-radius: 14px; padding: 10px 14px; min-width: 0; }
+  .tile .mono { font-size: 11px; color: var(--dim); }
+  .tile .led { font-size: 36px; margin-top: 4px; }
+  .verdict { grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; border-radius: 14px; padding: 10px 14px; border: 2px solid var(--amber); background: #1A1205; }
+  .verdict .score { font-size: 40px; color: var(--amber); }
+  .verdict b { display: block; font: 800 15px var(--f-text); }
+  .verdict span { font-size: 13px; color: var(--dim); }
+  .verdict.good { border-color: var(--green); background: #071A0F; } .verdict.good .score { color: var(--green); }
+  .verdict.bad { border-color: var(--red); background: #1F0A0C; } .verdict.bad .score { color: var(--red); }
+
+  /* full day */
+  .formula { position: relative; z-index: 1; text-align: center; font: 700 clamp(14px, 2vw, 21px)/2 var(--f-text); overflow-x: auto; }
+  .formula .k { color: var(--amber); }
+  .frac { display: inline-flex; flex-direction: column; vertical-align: middle; line-height: 1.3; margin: 0 4px; }
+  .frac span:first-child { border-bottom: 2px solid currentColor; padding: 0 4px 2px; } .frac span:last-child { padding: 2px 4px 0; }
+  .newterm { color: var(--amber); text-shadow: 0 0 10px #FFB02E88; }
+  .newterm sup { font: 600 10px var(--f-mono); background: var(--amber); color: #1A1000; border-radius: 4px; padding: 1px 5px; margin-left: 4px; }
+  .day-grid { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 900px) { .day-grid { grid-template-columns: 1fr; } }
+
+  footer { color: var(--dim); font: 400 11.5px/1.6 var(--f-mono); display: grid; gap: 4px; }
+  [hidden] { display: none !important; }
+  /* Tamil: Noto Sans Tamil, and no wide uppercase spacing (it breaks Tamil script) */
+  html[lang="ta"] { --f-text: 'Noto Sans Tamil', Poppins, 'Nirmala UI', sans-serif; --f-mono: 'Noto Sans Tamil', 'IBM Plex Mono', monospace; }
+  html[lang="ta"] .mono, html[lang="ta"] .sheet label, html[lang="ta"] .tablist button, html[lang="ta"] .slip h3, html[lang="ta"] .ptag .live, html[lang="ta"] .ptag .mine { letter-spacing: 0.02em; text-transform: none; }
+  html[lang="ta"] .stamp { font-family: var(--f-text); font-weight: 700; font-size: 20px; }
+  /* language switcher */
+  .langs { display: inline-flex; align-items: center; gap: 4px; background: var(--dash); border: 2px solid var(--edge); border-radius: 999px; padding: 3px; }
+  .langbtn { border: 0; background: transparent; border-radius: 999px; padding: 6px 11px; cursor: pointer; color: var(--dim); font: 600 13px var(--f-text); }
+  .langbtn[aria-pressed="true"] { background: var(--glow); color: #04141C; }
+  .langmore { border: 0; background: transparent; color: var(--dim); font: 600 13px var(--f-text); padding: 6px 4px; cursor: pointer; max-width: 96px; }
+  .langmore option { color: #000; }
+  .tabs-right { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===================== LIVE WALLET ===================== -->
+  <div class="wallet" aria-live="polite">
+    <div class="id">
+      <svg width="64" height="52" viewBox="0 0 96 76" aria-hidden="true">
+        <rect x="16" y="2" width="58" height="18" rx="3" fill="#5fae62" transform="rotate(-6 45 11)"/>
+        <rect x="4" y="12" width="86" height="60" rx="12" fill="#8a4520" stroke="#ffb02e" stroke-width="3"/>
+        <path d="M4 30 H70 Q90 30 90 42 V52 Q90 62 70 62 H4" fill="#6e3418" stroke="#ffb02e" stroke-width="3"/>
+        <circle cx="72" cy="46" r="6" fill="#ffb02e"/>
+      </svg>
+      <div class="mono"><span data-i18n="w.live">Live wallet</span><br><span id="w-mode">One ride</span></div>
+    </div>
+    <div class="cell in" id="c-in"><div class="mono" id="l-in">Fare in</div><div class="led" id="v-in">+₹0</div></div>
+    <div class="cell out" id="c-out"><div class="mono" data-i18n="w.out">Costs out</div><div class="led" id="v-out">−₹0</div></div>
+    <div class="cell net" id="c-net"><div class="mono" data-i18n="w.keep">You keep</div><div class="led" id="v-net">₹0</div></div>
+  </div>
+
+  <div class="tabs">
+    <h1><span data-i18n="h1">Taxi Wallet Calculator</span><small data-i18n="h1.sub">What a cab driver really keeps. Enter your numbers and watch the trip run.</small></h1>
+    <div class="tabs-right">
+    <div class="tablist" role="tablist" aria-label="Calculator">
+      <button id="tab-ride" role="tab" aria-selected="true" aria-controls="ride" data-i18n="tab.ride">One ride</button>
+      <button id="tab-day" role="tab" aria-selected="false" aria-controls="day" data-i18n="tab.day">Full day</button>
+    </div>
+    <div class="langs" role="group" aria-label="Language"><button class="langbtn" data-lang="en" aria-pressed="true">EN</button><button class="langbtn" data-lang="ta" aria-pressed="false" lang="ta">தமிழ்</button><select class="langmore" aria-label="More languages" data-i18n-aria="lang.more"><option value="">More…</option><option value="hi">हिन्दी Hindi</option><option value="te">తెలుగు Telugu</option><option value="kn">ಕನ್ನಡ Kannada</option><option value="ml">മലയാളം Malayalam</option><option value="mr">मराठी Marathi</option><option value="bn">বাংলা Bengali</option><option value="gu">ગુજરાતી Gujarati</option><option value="pa">ਪੰਜਾਬੀ Punjabi</option><option value="or">ଓଡ଼ିଆ Odia</option><option value="ur">اردو Urdu</option><option value="si">සිංහල Sinhala</option><option value="ms">Bahasa Melayu</option><option value="ar">العربية Arabic</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="zh-CN">中文</option><option value="ja">日本語</option></select></div>
+    </div>
+  </div>
+
+  <!-- ===================== ONE RIDE ===================== -->
+  <section id="ride" role="tabpanel" aria-labelledby="tab-ride" class="ride-grid">
+    <div class="screen sheet">
+      <div class="tag mono"><span data-i18n="trip.sheet">Trip sheet</span><span style="color:var(--dim)" data-i18n="trip.enter">enter your ride</span></div>
+      <label for="r-fare" data-i18n="lbl.r.fare">Customer fare (₹)</label>
+      <input id="r-fare" type="number" inputmode="decimal" min="0" step="1" value="240">
+      <div class="chips" id="fare-chips"><button class="chip">₹70</button><button class="chip">₹120</button><button class="chip">₹240</button><button class="chip">₹450</button></div>
+      <div class="two">
+        <div><label for="r-pick" data-i18n="lbl.r.pick">Pickup km (empty)</label><input id="r-pick" type="number" inputmode="decimal" min="0" step="0.1" value="3"></div>
+        <div><label for="r-km" data-i18n="lbl.r.km">Ride km (paid)</label><input id="r-km" type="number" inputmode="decimal" min="0" step="0.1" value="15"></div>
+      </div>
+      <div class="two">
+        <div><label for="r-min" data-i18n="lbl.r.min">Ride time (min)</label><input id="r-min" type="number" inputmode="decimal" min="1" step="1" value="30"></div>
+        <div><label for="r-comm" data-i18n="lbl.comm">App cut %</label><input id="r-comm" type="number" inputmode="decimal" min="0" max="60" step="0.5" value="22"></div>
+      </div>
+      <label for="r-veh" data-i18n="lbl.fuel">Fuel</label>
+      <select id="r-veh">
+        <option value="cng" data-i18n="opt.cng">CNG</option>
+        <option value="petrol" data-i18n="opt.petrol">Petrol</option>
+        <option value="diesel" data-i18n="opt.diesel">Diesel</option>
+        <option value="ev" data-i18n="opt.ev">EV (home charging)</option>
+      </select>
+      <div class="two">
+        <div><label for="r-mil" id="r-mil-l">Mileage km/kg</label><input id="r-mil" type="number" inputmode="decimal" min="0.1" step="0.1" value="18"></div>
+        <div><label for="r-price" id="r-price-l">Price ₹/kg</label><input id="r-price" type="number" inputmode="decimal" min="0" step="0.01" value="99.50"></div>
+      </div>
+      <div class="ptag" id="r-ptag" aria-live="polite"></div>
+      <div class="two">
+        <div><label for="r-mnt" data-i18n="lbl.r.mnt">Upkeep ₹/km</label><input id="r-mnt" type="number" inputmode="decimal" min="0" step="0.1" value="2.2"></div>
+        <div><label for="r-tgt" data-i18n="lbl.r.tgt">Target ₹/km</label><input id="r-tgt" type="number" inputmode="decimal" min="0.1" step="0.1" value="5"></div>
+      </div>
+      <div class="note" data-i18n="r.note">Mileage, upkeep and target are examples. Put in yours.</div>
+      <button class="go" id="go" data-i18n="go">Run this trip</button>
+    </div>
+
+    <div class="screen">
+      <div class="tag mono"><span data-i18n="nav">Nav · deadhead</span><span id="phase" style="color:var(--amber)" data-i18n="ph.ready">Ready</span></div>
+      <div class="nav">
+        <svg class="map" id="map" viewBox="0 0 640 380" role="img" aria-label="Route map: empty pickup run and paid ride" data-i18n-aria="map.aria"></svg>
+        <div class="meters">
+          <div class="meter"><div class="mono" data-i18n="m.paid">Paid km</div><div class="led" id="m-paid" style="color:var(--amber);text-shadow:0 0 12px var(--amber)">0</div></div>
+          <div class="meter"><div class="mono" data-i18n="m.empty">Empty km</div><div class="led" id="m-empty" style="color:var(--grey)">0</div></div>
+          <div class="meter"><div class="mono" data-i18n="m.fuel">Fuel used</div><div class="led" id="m-fuel" style="color:var(--red);text-shadow:0 0 10px var(--red)">₹0</div></div>
+        </div>
+      </div>
+      <div class="status"><span class="mono" id="statusline" data-i18n="st.enter">Enter a ride on the trip sheet</span><button class="replay" id="replay" data-i18n="replay">↻ Replay</button></div>
+
+      <div class="results">
+        <div class="slip" id="slip">
+          <h3 data-i18n="slip">Trip slip</h3>
+          <div class="ln"><span data-i18n="s.fare">Fare</span><b class="pos" id="s-fare"></b></div>
+          <div class="ln"><span><span data-i18n="s.cut">App cut</span><small id="s-cut-s"></small></span><b class="neg" id="s-cut"></b></div>
+          <div class="ln"><span><span data-i18n="s.fuel">Fuel</span><small id="s-fuel-s"></small></span><b class="neg" id="s-fuel"></b></div>
+          <div class="ln"><span><span data-i18n="s.mnt">Upkeep</span><small id="s-mnt-s"></small></span><b class="neg" id="s-mnt"></b></div>
+          <div class="ln tot"><span data-i18n="s.keep">You keep</span><b id="s-net"></b></div>
+          <div class="stamp" id="stamp">KEEPS ₹0</div>
+        </div>
+        <div class="eff">
+          <div class="tile"><div class="mono" data-i18n="e.pkm">Profit / km</div><div class="led" id="e-pkm">₹0</div></div>
+          <div class="tile"><div class="mono" data-i18n="e.hr">Per hour (est.)</div><div class="led" id="e-hr">₹0</div></div>
+          <div class="tile"><div class="mono" data-i18n="e.burn">Fuel / km</div><div class="led" id="e-burn" style="color:var(--amber)">₹0</div></div>
+          <div class="tile"><div class="mono" data-i18n="e.op">Cost / km</div><div class="led" id="e-op">₹0</div></div>
+          <div class="verdict" id="verdict"><div class="led score" id="v-score">0.0</div><div><b id="v-title">—</b><span id="v-sub"></span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FULL DAY ===================== -->
+  <section id="day" role="tabpanel" aria-labelledby="tab-day" hidden>
+    <div class="screen" style="margin-bottom:16px">
+      <div class="tag mono"><span data-i18n="tp">True profit</span><span style="color:var(--dim)" data-i18n="tp.sub">every cost, every day</span></div>
+      <div class="formula" data-i18n="formula" data-html>
+        <span class="k">True Daily Profit</span> = Net App Payout − ( <span class="frac"><span>Total KM</span><span>Real Mileage</span></span> × Fuel Price )
+        − (Total KM × Maintenance per km) − Daily EMI / Rent − <span class="newterm">Daily Insurance<sup>NEW</sup></span> − <span class="newterm">Miscellaneous (tea, bajji)<sup>NEW</sup></span>
+      </div>
+    </div>
+    <div class="day-grid">
+      <div class="screen sheet">
+        <div class="tag mono"><span data-i18n="day.sheet">Day sheet</span><span style="color:var(--dim)" data-i18n="day.sub">your whole day</span></div>
+        <div class="two">
+          <div><label for="d-earn" data-i18n="lbl.d.earn">App earnings ₹</label><input id="d-earn" type="number" inputmode="decimal" min="0" step="1" value="2500"></div>
+          <div><label for="d-comm" data-i18n="lbl.comm">App cut %</label><input id="d-comm" type="number" inputmode="decimal" min="0" max="60" step="0.5" value="22"></div>
+        </div>
+        <label for="d-veh" data-i18n="lbl.fuel">Fuel</label>
+        <select id="d-veh">
+          <option value="petrol" selected data-i18n="opt.petrol">Petrol</option>
+          <option value="diesel" data-i18n="opt.diesel">Diesel</option>
+          <option value="cng" data-i18n="opt.cng">CNG</option>
+          <option value="ev" data-i18n="opt.ev">EV (home charging)</option>
+        </select>
+        <div class="two">
+          <div><label for="d-km" data-i18n="lbl.d.km">Total km</label><input id="d-km" type="number" inputmode="decimal" min="0" step="1" value="150"></div>
+          <div><label for="d-mil" id="d-mil-l">Real mileage km/L</label><input id="d-mil" type="number" inputmode="decimal" min="0.1" step="0.1" value="15"></div>
+        </div>
+        <div class="two">
+          <div><label for="d-price" id="d-price-l">Price ₹/L</label><input id="d-price" type="number" inputmode="decimal" min="0" step="0.01" value="107.77"></div>
+          <div><label for="d-mnt" data-i18n="lbl.d.mnt">Upkeep ₹/km</label><input id="d-mnt" type="number" inputmode="decimal" min="0" step="0.1" value="1.5"></div>
+        </div>
+        <div class="ptag" id="d-ptag" aria-live="polite"></div>
+        <div class="two">
+          <div><label for="d-emi" data-i18n="lbl.d.emi">EMI / rent ₹ a day</label><input id="d-emi" type="number" inputmode="decimal" min="0" step="1" value="600"></div>
+          <div><label for="d-ins" data-i18n="lbl.d.ins">Insurance ₹ a year</label><input id="d-ins" type="number" inputmode="decimal" min="0" step="100" value="36500"></div>
+        </div>
+        <div class="two">
+          <div><label for="d-days" data-i18n="lbl.d.days">Insurance spread over (days)</label><input id="d-days" type="number" inputmode="decimal" min="1" max="366" step="1" value="365"></div>
+          <div><label for="d-misc" data-i18n="lbl.d.misc">Miscellaneous ₹ a day</label><input id="d-misc" type="number" inputmode="decimal" min="0" step="5" value="60" placeholder="60"></div>
+        </div>
+        <div class="note" data-i18n="d.misc.note">Miscellaneous: small daily spends like tea ₹30 and bajji ₹30 (example ₹60). Add parking, toll, water or car wash if you pay them.</div>
+        <div class="note" data-i18n="d.note">Earnings, km and costs start with the video's worked example; mileages are examples (petrol 15, diesel 19, CNG 24, EV 7); fuel prices are the latest Chennai prices. Put in your own day.</div>
+      </div>
+      <div class="screen">
+        <div class="tag mono"><span data-i18n="day.slip">Day slip</span><span id="d-phase" style="color:var(--amber)"></span></div>
+        <div class="slip" style="position:relative;z-index:1">
+          <h3 data-i18n="w.tdp">True daily profit</h3>
+          <div class="ln"><span><span data-i18n="w.pay">Net app payout</span><small id="w-pay-s"></small></span><b class="pos" id="w-pay"></b></div>
+          <div class="ln"><span><span data-i18n="s.fuel">Fuel</span><small id="w-fuel-s"></small></span><b class="neg" id="w-fuel"></b></div>
+          <div class="ln"><span><span data-i18n="s.mnt">Upkeep</span><small id="w-mnt-s"></small></span><b class="neg" id="w-mnt"></b></div>
+          <div class="ln"><span><span data-i18n="w.emi">EMI / rent</span><small data-i18n="w.perday">per day</small></span><b class="neg" id="w-emi"></b></div>
+          <div class="ln"><span style="color:#9A5B00"><span data-i18n="w.ins">Insurance</span><small id="w-ins-s"></small></span><b class="neg" id="w-ins"></b></div>
+          <div class="ln"><span><span data-i18n="w.misc">Miscellaneous</span><small data-i18n="w.misc.sub">tea, bajji, per day</small></span><b class="neg" id="w-misc"></b></div>
+          <div class="ln tot"><span><span data-i18n="w.tdp">True daily profit</span><small id="w-note"></small></span><b id="w-true"></b></div>
+          <div class="stamp on" id="d-stamp">₹0</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div id="foot-prices" data-i18n="foot.1">Fuel prices come from the sakas.in Chennai price board: petrol and diesel from PPAC, Govt of India (updated daily); CNG from Inflation Tracker price data (monthly); EV home charging ₹11.80/unit (TNERC top domestic slab). Mileages are examples. Change any number to yours.</div>
+    <div data-i18n="foot.2">For information only, not financial advice. Your costs differ. Inflation Tracker.</div>
+  </footer>
+</div>
+
+<script>
+window.I18N = (function () {
+  const KEY = 'sakas-lang';
+  let lang = 'en';
+  try {
+    const q = new URLSearchParams(location.search).get('lang');
+    lang = q === 'ta' || q === 'en' ? q : (localStorage.getItem(KEY) || 'en');
+  } catch (e) {}
+  if (lang !== 'ta') lang = 'en';
+  let dict = {};
+  const en = new Map(), listeners = [];
+
+  function capture() {
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      if (!en.has(el)) en.set(el, el.hasAttribute('data-html') ? el.innerHTML : el.textContent);
+    });
+  }
+  function apply() {
+    capture();
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const tr = lang === 'ta' ? dict[el.getAttribute('data-i18n')] : null;
+      const val = tr != null ? tr : en.get(el);
+      if (el.hasAttribute('data-html')) el.innerHTML = val; else el.textContent = val;
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach((el) => {
+      if (!el.dataset.ariaEn) el.dataset.ariaEn = el.getAttribute('aria-label') || '';
+      const tr = lang === 'ta' ? dict[el.getAttribute('data-i18n-aria')] : null;
+      el.setAttribute('aria-label', tr != null ? tr : el.dataset.ariaEn);
+    });
+    document.querySelectorAll('.langbtn').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+    listeners.forEach((f) => { try { f(lang); } catch (e) {} });
+  }
+  function t(key, fallback, vars) {
+    let s = (lang === 'ta' && dict[key] != null) ? dict[key] : fallback;
+    if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m));
+    return s;
+  }
+  function set(l) {
+    lang = l === 'ta' ? 'ta' : 'en';
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+    apply();
+  }
+  function wire() {
+    document.querySelectorAll('.langbtn').forEach((b) => b.addEventListener('click', () => set(b.dataset.lang)));
+    document.querySelectorAll('.langmore').forEach((sel) => sel.addEventListener('change', () => {
+      const tl = sel.value; sel.value = '';
+      if (!tl) return;
+      const page = location.href.replace(/[?#].*$/, '');
+      if (!/^https?:/.test(page)) { alert('Other languages work on the live site (sakas.in).'); return; }
+      location.href = 'https://translate.google.com/translate?sl=en&tl=' + encodeURIComponent(tl) + '&u=' + encodeURIComponent(page);
+    }));
+  }
+  return {
+    init(d) { dict = d || {}; wire(); apply(); },
+    t,
+    onChange(f) { listeners.push(f); },
+    get lang() { return lang; },
+    locale() { return lang === 'ta' ? 'ta-IN' : 'en-IN'; },
+  };
+})();
+// Tamil for the calculator. Keys match data-i18n="..." in the page and T('...') in the script below.
+window.TA_CALC = {
+  'lang.more': 'மேலும் மொழிகள்',
+  'w.live': 'நேரடி வாலட்', 'w.mode.ride': 'ஒரு சவாரி', 'w.mode.day': 'முழு நாள்', 'w.in.ride': 'வந்த கட்டணம்', 'w.in.day': 'ஆப் வருமானம்', 'w.out': 'செலவுகள்', 'w.keep': 'கையில் மிச்சம்',
+  'h1': 'டாக்ஸி வாலட் கால்குலேட்டர்', 'h1.sub': 'ஒரு கேப் ஓட்டுநருக்கு உண்மையில் எவ்வளவு மிஞ்சுகிறது. உங்கள் எண்களை உள்ளிட்டு, பயணம் ஓடுவதைப் பாருங்கள்.',
+  'tab.ride': 'ஒரு சவாரி', 'tab.day': 'முழு நாள்',
+  'trip.sheet': 'பயணத் தாள்', 'trip.enter': 'உங்கள் சவாரியை உள்ளிடுங்கள்',
+  'lbl.r.fare': 'வாடிக்கையாளர் கட்டணம் (₹)', 'lbl.r.pick': 'பிக்கப் கி.மீ (காலியாக)', 'lbl.r.km': 'சவாரி கி.மீ (கட்டணத்துடன்)', 'lbl.r.min': 'சவாரி நேரம் (நிமிடம்)',
+  'lbl.comm': 'ஆப் கமிஷன் %', 'lbl.fuel': 'எரிபொருள்', 'lbl.r.mnt': 'பராமரிப்பு ₹/கி.மீ', 'lbl.r.tgt': 'இலக்கு ₹/கி.மீ',
+  'lbl.d.earn': 'ஆப் வருமானம் ₹', 'lbl.d.km': 'மொத்த கி.மீ', 'lbl.d.mnt': 'பராமரிப்பு ₹/கி.மீ', 'lbl.d.emi': 'EMI / வாடகை ₹ ஒரு நாளுக்கு',
+  'lbl.d.ins': 'காப்பீடு ₹ ஒரு ஆண்டுக்கு', 'lbl.d.days': 'காப்பீட்டைப் பிரிக்கும் நாட்கள்',
+  'lbl.mil': 'மைலேஜ் {u}', 'lbl.realmil': 'உண்மையான மைலேஜ் {u}', 'lbl.price': 'விலை ₹/{u}',
+  'u.km/kg': 'கி.மீ/கிலோ', 'u.km/L': 'கி.மீ/லி', 'u.km/unit': 'கி.மீ/யூனிட்', 'u.kg': 'கிலோ', 'u.L': 'லி', 'u.unit': 'யூனிட்',
+  'opt.cng': 'CNG', 'opt.petrol': 'பெட்ரோல்', 'opt.diesel': 'டீசல்', 'opt.ev': 'EV (வீட்டில் சார்ஜிங்)',
+  'r.note': 'மைலேஜ், பராமரிப்பு, இலக்கு ஆகியவை உதாரணங்கள். உங்களுடையதை உள்ளிடுங்கள்.', 'go': 'இந்தப் பயணத்தை ஓட்டிப் பாருங்கள்',
+  'p.live': 'சமீபத்திய சென்னை விலை', 'p.type': '· உங்கள் விலையையும் உள்ளிடலாம்', 'p.mine': 'உங்கள் விலை', 'p.latest': 'சமீபத்திய சென்னை: ₹{p}', 'p.use': '↺ சமீபத்திய விலை',
+  'src.PPAC, Govt of India': 'PPAC, இந்திய அரசு', 'src.Inflation Tracker data': 'Inflation Tracker தரவு', 'src.TNERC top domestic slab': 'TNERC உயர் வீட்டு மின் கட்டணப் பிரிவு',
+  'nav': 'வழி · காலி ஓட்டம்', 'map.aria': 'வழி வரைபடம்: காலியாக பிக்கப்புக்குச் செல்லும் வழி, கட்டணச் சவாரி',
+  'm.paid': 'கட்டண கி.மீ', 'm.empty': 'காலி கி.மீ', 'm.fuel': 'எரிபொருள் செலவு', 'replay': '↻ மீண்டும்',
+  'ph.ready': 'தயார்', 'ph.pickup': 'பிக்கப்புக்கு', 'ph.trip': 'பயணத்தில்', 'ph.drop': 'இறக்கிவிட்டார்',
+  'st.enter': 'பயணத் தாளில் ஒரு சவாரியை உள்ளிடுங்கள்', 'st.empty': 'பிக்கப்புக்குக் காலியாகச் செல்கிறார்', 'st.on': 'பயணி உள்ளே · மீட்டர் ஓடுகிறது',
+  'st.done': '{km} கி.மீ ஓட்டினார் · {e} கி.மீ-க்கு யாரும் கட்டணம் தரவில்லை ({p}%)',
+  'tag.empty': 'காலி', 'tag.passenger': 'பயணி',
+  'slip': 'பயணச் சீட்டு', 's.fare': 'கட்டணம்', 's.cut': 'ஆப் கமிஷன்', 's.fuel': 'எரிபொருள்', 's.mnt': 'பராமரிப்பு', 's.keep': 'கையில் மிச்சம்',
+  's.cut.sub': '{f}-ல் {c}%', 'stamp.keep': 'மிச்சம் {v}', 'stamp.loss': 'நஷ்டம் {v}',
+  'e.pkm': 'லாபம் / கி.மீ', 'e.hr': 'ஒரு மணிக்கு (தோராயம்)', 'e.burn': 'எரிபொருள் / கி.மீ', 'e.op': 'செலவு / கி.மீ',
+  'v.loss': 'நஷ்டமான சவாரி', 'v.loss.s': 'கிடைப்பதைவிட {v} அதிகம் செலவாகிறது.',
+  'v.good': 'நல்ல சவாரி', 'v.good.s': 'உங்கள் {t}/கி.மீ இலக்கை {d} தாண்டியது.',
+  'v.avg': 'சராசரி சவாரி', 'v.avg.s': 'உங்கள் {t}/கி.மீ இலக்கைவிடக் குறைவு. இறங்கும் இடம் பிஸியான பகுதிக்கு அருகில் என்றால் எடுக்கலாம்.',
+  'v.weak': 'பலவீனமான சவாரி', 'v.weak.s': 'உங்கள் {t}/கி.மீ இலக்கைவிட மிகக் குறைவு. காலி கி.மீ-யும் எரிபொருளும் கட்டணத்தைத் தின்றுவிடுகின்றன.',
+  'tp': 'உண்மையான லாபம்', 'tp.sub': 'ஒவ்வொரு செலவும், ஒவ்வொரு நாளும்',
+  'formula': '<span class="k">உண்மையான தினசரி லாபம்</span> = ஆப் நிகர வருமானம் − ( <span class="frac"><span>மொத்த கி.மீ</span><span>உண்மையான மைலேஜ்</span></span> × எரிபொருள் விலை ) − (மொத்த கி.மீ × கி.மீ-க்கான பராமரிப்பு) − தினசரி EMI / வாடகை − <span class="newterm">தினசரி காப்பீடு<sup>புதிது</sup></span> − <span class="newterm">இதர செலவுகள் (டீ, பஜ்ஜி)<sup>புதிது</sup></span>',
+  'lbl.d.misc': 'இதர செலவுகள் ₹ ஒரு நாளுக்கு', 'd.misc.note': 'இதர செலவுகள்: டீ ₹30, பஜ்ஜி ₹30 போன்ற சின்னச் சின்ன தினசரி செலவுகள் (உதாரணம் ₹60). பார்க்கிங், டோல், தண்ணீர், கார் வாஷ் செலவு இருந்தால் அதையும் சேர்த்துக்கொள்ளுங்கள்.',
+  'w.misc': 'இதர செலவுகள்', 'w.misc.sub': 'டீ, பஜ்ஜி, ஒரு நாளுக்கு',
+  'day.sheet': 'நாள் தாள்', 'day.sub': 'உங்கள் முழு நாள்', 'day.slip': 'நாள் சீட்டு',
+  'd.note': 'வருமானம், கி.மீ, செலவுகள் வீடியோவின் உதாரணத்திலிருந்து தொடங்குகின்றன; மைலேஜ் உதாரணங்கள் (பெட்ரோல் 15, டீசல் 19, CNG 24, EV 7); எரிபொருள் விலைகள் சமீபத்திய சென்னை விலைகள். உங்கள் நாளை உள்ளிடுங்கள்.',
+  'w.tdp': 'உண்மையான தினசரி லாபம்', 'w.pay': 'ஆப் நிகர வருமானம்', 'w.emi': 'EMI / வாடகை', 'w.perday': 'ஒரு நாளுக்கு', 'w.ins': 'காப்பீடு',
+  'w.pay.sub': '{e} − {c}% ஆப் கமிஷன்', 'w.fuel.sub': '{f}: {km} கி.மீ ÷ {m} {mu} × {p}/{pu}', 'w.mnt.sub': '{km} கி.மீ × {p}/கி.மீ',
+  'w.ins.sub': 'ஆண்டுக்கு {v} ÷ {d} நாட்கள்', 'w.lossnote': 'நாளுக்கு {v} நஷ்டம்', 'w.keepnote': 'எல்லாச் செலவுக்கும் பிறகு நாளுக்கு மிச்சம்',
+  'ph.loss': 'நஷ்டத்தில் ஓடுகிறது', 'ph.profit': 'லாபத்தில்',
+  's.fuel.sub': '{km} கி.மீ ÷ {m} {mu} × {p}', 's.mnt.sub': '{km} கி.மீ × {p}',
+  'foot.1': 'எரிபொருள் விலைகள் sakas.in சென்னை விலைப் பலகையிலிருந்து: பெட்ரோல், டீசல் PPAC, இந்திய அரசு (தினமும்); CNG, Inflation Tracker தரவு (மாதம் ஒருமுறை); EV வீட்டு சார்ஜிங் ₹11.80/யூனிட் (TNERC உயர் பிரிவு). மைலேஜ் உதாரணங்கள். எந்த எண்ணையும் உங்களுடையதாக மாற்றலாம்.',
+  'foot.2': 'தகவலுக்காக மட்டும்; நிதி ஆலோசனை அல்ல. உங்கள் செலவுகள் மாறுபடலாம். Inflation Tracker.',
+};
+</script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const T = (k, en, v) => (window.I18N ? I18N.t(k, en, v) : String(en).replace(/\{(\w+)\}/g, (m, x) => (v && v[x] != null ? v[x] : m)));
+  const U = (u) => T('u.' + u, u);   // units: km/kg -> கி.மீ/கிலோ in Tamil
+  const num = (id) => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : 0; };
+  const rs = (v, dp = 2) => (v < -0.005 ? '−' : '') + '₹' + Math.abs(v).toLocaleString('en-IN', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  const rs0 = (v) => rs(v, 0);
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // fuel presets: example mileage + the live Chennai price. These built-in prices are only a fallback: on the site the
+  // calculator reads ../prices.json (the same file as the price board), so petrol & diesel follow PPAC every day.
+  const VEH = {
+    cng: { mil: 18, mu: 'km/kg', price: 99.50, pu: 'kg', asOf: '2026-10', src: 'Inflation Tracker data' },
+    petrol: { mil: 15, mu: 'km/L', price: 107.77, pu: 'L', asOf: '2026-11-20', src: 'PPAC, Govt of India' },
+    diesel: { mil: 19, mu: 'km/L', price: 99.55, pu: 'L', asOf: '2026-11-20', src: 'PPAC, Govt of India' },
+    ev: { mil: 7, mu: 'km/unit', price: 11.80, pu: 'unit', asOf: '', src: 'TNERC top domestic slab' },
+  };
+  const asOfText = (a) => { if (!a) return ''; const [y, m, d] = String(a).split('-').map(Number); const mon = new Date(y, (m || 1) - 1, 1).toLocaleString(window.I18N ? I18N.locale() : 'en-IN', { month: 'short' }); return d ? `${d} ${mon} ${y}` : `${mon} ${y}`; };
+
+  // each price box opens with today's price; a viewer can type their own, and go back with one tap
+  const PRICE = { r: { mine: false }, d: { mine: false } };
+  const liveFor = (box) => VEH[$(box + '-veh').value];
+  // Full day: real-traffic mileage per fuel, from the video's four-fuel comparison (examples, editable)
+  const DAY_MIL = { petrol: 15, diesel: 19, cng: 24, ev: 7 };
+  const applyDayFuel = (fill) => {
+    const v = VEH[$('d-veh').value];
+    $('d-mil-l').textContent = T('lbl.realmil', 'Real mileage {u}', { u: U(v.mu) }); $('d-price-l').textContent = T('lbl.price', 'Price ₹/{u}', { u: U(v.pu) });
+    if (fill) { $('d-mil').value = DAY_MIL[$('d-veh').value]; useLive('d'); }
+  };
+  function priceTag(box) {
+    const v = liveFor(box), el = $(box + '-ptag'), cur = parseFloat($(box + '-price').value);
+    const mine = PRICE[box].mine && Math.abs(cur - v.price) > 0.004;
+    const when = [asOfText(v.asOf), T('src.' + v.src, v.src)].filter(Boolean).join(' · ');
+    el.innerHTML = mine
+      ? `<span class="mine">${T('p.mine', 'YOUR PRICE')}</span><span>${T('p.latest', 'Latest Chennai: ₹{p}', { p: v.price.toFixed(2) })}</span><button type="button" data-box="${box}">${T('p.use', '↺ Use latest price')}</button>`
+      : `<span class="live">${T('p.live', 'LATEST CHENNAI PRICE')}</span><span>${when}</span><span>${T('p.type', '· type to use your own')}</span>`;
+  }
+  function useLive(box) { $(box + '-price').value = liveFor(box).price.toFixed(2); PRICE[box].mine = false; priceTag(box); }
+  const applyVehicle = (fill) => {
+    const v = VEH[$('r-veh').value]; $('r-mil-l').textContent = T('lbl.mil', 'Mileage {u}', { u: U(v.mu) }); $('r-price-l').textContent = T('lbl.price', 'Price ₹/{u}', { u: U(v.pu) });
+    if (fill) { $('r-mil').value = v.mil; useLive('r'); }
+  };
+
+  // ---------------------------------------------------------------- the ride, worked out
+  function rideCalc() {
+    const fare = num('r-fare'), comm = num('r-comm') / 100, paidKm = Math.max(0, num('r-km')), emptyKm = Math.max(0, num('r-pick')), mins = Math.max(1, num('r-min'));
+    const mil = Math.max(0.1, num('r-mil')), price = num('r-price'), upk = num('r-mnt'), tgt = Math.max(0.1, num('r-tgt')), km = paidKm + emptyKm;
+    const cut = Math.round(fare * comm), fuel = km / mil * price, maint = km * upk, net = fare - cut - fuel - maint;
+    return { fare, comm, paidKm, emptyKm, mins, mil, price, upk, tgt, km, cut, fuel, maint, net, perKm: km ? net / km : 0, perHr: net / (mins / 60), burn: km ? fuel / km : 0, op: km ? (fuel + maint) / km : 0, unit: VEH[$('r-veh').value].mu };
+  }
+
+  // ---------------------------------------------------------------- route map: empty run to the pickup (dashed), then the paid ride (amber)
+  const NS = 'http://www.w3.org/2000/svg', map = $('map'), GX = 20, GY = 11, OX = 20, OY = 22;
+  const el = (tag, attrs, parent = map) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+  let cell = 30;
+  // seeded random so the same ride always draws the same route
+  const rng = (seed) => { let a = seed >>> 0 || 1; return () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+  // a leg of n blocks along the roads, turning at random, staying inside the map
+  function leg(from, n, r, startH) {
+    const pts = [from.slice()]; let p = from.slice(), rem = n, h = startH;
+    while (rem > 0) {
+      const max = h ? 7 : 4, seg = Math.min(rem, 1 + Math.floor(r() * max));
+      let s = r() < 0.5 ? -1 : 1; const lim = h ? GX : GY, i = h ? 0 : 1;
+      if (p[i] + s * seg < 0 || p[i] + s * seg > lim) s = -s;
+      const go = Math.max(0, Math.min(seg, s > 0 ? lim - p[i] : p[i]));
+      if (go > 0) { p = p.slice(); p[i] += s * go; pts.push(p); rem -= go; } else rem -= 0;
+      h = !h;
+      if (go === 0 && pts.length > 400) break;
+    }
+    return pts;
+  }
+  const lenOf = (pts) => pts.slice(1).reduce((s, q, i) => s + Math.abs(q[0] - pts[i][0]) + Math.abs(q[1] - pts[i][1]), 0);
+  const at = (pts, d) => { for (let i = 1; i < pts.length; i++) { const s = Math.abs(pts[i][0] - pts[i - 1][0]) + Math.abs(pts[i][1] - pts[i - 1][1]); if (d <= s) { const k = s ? d / s : 0; return [pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * k, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * k]; } d -= s; } return pts[pts.length - 1]; };
+  const upto = (pts, d) => { const out = [pts[0]]; for (let i = 1; i < pts.length; i++) { const s = Math.abs(pts[i][0] - pts[i - 1][0]) + Math.abs(pts[i][1] - pts[i - 1][1]); if (d <= s) { out.push(at([pts[i - 1], pts[i]], d)); return out; } out.push(pts[i]); d -= s; } return out; };
+  const P = (p) => `${OX + p[0] * cell},${OY + p[1] * cell}`;
+
+  let anim = null;
+  function buildMap(R) {
+    while (map.firstChild) map.removeChild(map.firstChild);
+    cell = 30;
+    for (let y = 0; y <= GY; y++) el('line', { x1: OX, x2: OX + GX * cell, y1: OY + y * cell, y2: OY + y * cell, stroke: '#183248', 'stroke-width': y % 3 ? 5 : 10, 'stroke-linecap': 'round' });
+    for (let x = 0; x <= GX; x++) el('line', { x1: OX + x * cell, x2: OX + x * cell, y1: OY, y2: OY + GY * cell, stroke: '#183248', 'stroke-width': x % 3 ? 5 : 10, 'stroke-linecap': 'round' });
+    // blocks are drawn in whole km (the meters count the exact km)
+    const r = rng(Math.round(R.emptyKm * 10) * 7919 + Math.round(R.paidKm * 10) * 131 + 17);
+    const scale = R.km > 60 ? 60 / R.km : 1;          // very long trips are drawn shorter, so they still fit the screen
+    const nE = R.emptyKm > 0 ? Math.max(1, Math.round(R.emptyKm * scale)) : 0, nP = R.paidKm > 0 ? Math.max(1, Math.round(R.paidKm * scale)) : 0;
+    const start = [2 + Math.floor(r() * 4), 7 + Math.floor(r() * 3)];
+    const eLeg = nE ? leg(start, nE, r, true) : [start];
+    const pLeg = nP ? leg(eLeg[eLeg.length - 1], nP, r, false) : [eLeg[eLeg.length - 1]];
+    const g = {};
+    g.eTrail = el('polyline', { fill: 'none', stroke: '#C9D3DC', 'stroke-width': 5, 'stroke-dasharray': '9 10', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0.9 });
+    g.pTrail = el('polyline', { fill: 'none', stroke: '#FFB02E', 'stroke-width': 8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', style: 'filter: drop-shadow(0 0 6px #FFB02E)' });
+    // start: the taxi's position when the request comes in
+    el('circle', { cx: OX + start[0] * cell, cy: OY + start[1] * cell, r: 7, fill: '#3FD0FF' });
+    const pin = eLeg[eLeg.length - 1], drop = pLeg[pLeg.length - 1];
+    g.pickup = el('g', { opacity: 0 }); el('circle', { cx: OX + pin[0] * cell, cy: OY + pin[1] * cell, r: 11, fill: '#38E07B', stroke: '#04140A', 'stroke-width': 4 }, g.pickup);
+    g.drop = el('g', { opacity: 0 }); el('rect', { x: OX + drop[0] * cell - 10, y: OY + drop[1] * cell - 10, width: 20, height: 20, rx: 4, fill: '#FFB02E', stroke: '#241400', 'stroke-width': 4 }, g.drop);
+    g.tag = el('text', { x: 0, y: 0, 'text-anchor': 'middle', fill: '#C9D3DC', stroke: '#071018', 'stroke-width': 6, 'paint-order': 'stroke', style: "font: 600 13px 'IBM Plex Mono', monospace; letter-spacing: 2px" });
+    g.car = el('circle', { r: 13, fill: '#F6C21C', stroke: '#000', 'stroke-width': 4 });
+    return { eLeg, pLeg, lenE: lenOf(eLeg), lenP: lenOf(pLeg), g };
+  }
+
+  function setWallet(fareIn, out) {
+    $('v-in').textContent = '+' + rs0(fareIn);
+    $('v-out').textContent = '−' + rs0(out);
+    const net = fareIn - out;
+    $('v-net').textContent = rs0(net);
+    $('c-net').classList.toggle('loss', net < 0);
+  }
+  const flash = (id) => { const c = $(id); c.classList.add('flash'); setTimeout(() => c.classList.remove('flash'), 450); };
+
+  function results(R) {
+    $('s-fare').textContent = rs(R.fare);
+    $('s-cut').textContent = '−' + rs(R.cut); $('s-cut-s').textContent = T('s.cut.sub', '{c}% of {f}', { c: num('r-comm'), f: rs0(R.fare) });
+    $('s-fuel').textContent = '−' + rs(R.fuel); $('s-fuel-s').textContent = T('s.fuel.sub', '{km} km ÷ {m} {mu} × {p}', { km: +R.km.toFixed(1), m: R.mil, mu: U(R.unit), p: rs(R.price) });
+    $('s-mnt').textContent = '−' + rs(R.maint); $('s-mnt-s').textContent = T('s.mnt.sub', '{km} km × {p}', { km: +R.km.toFixed(1), p: rs(R.upk) });
+    $('s-net').textContent = rs(R.net); $('s-net').className = R.net < 0 ? 'neg' : 'pos';
+    $('stamp').textContent = R.net < 0 ? T('stamp.loss', 'LOSS {v}', { v: rs0(-R.net) }) : T('stamp.keep', 'KEEPS {v}', { v: rs0(R.net) }); $('stamp').classList.toggle('loss', R.net < 0);
+    $('e-pkm').textContent = rs(R.perKm); $('e-pkm').style.color = R.perKm >= R.tgt ? 'var(--green)' : R.perKm < 0 ? 'var(--red)' : 'var(--white)';
+    $('e-hr').textContent = rs0(R.perHr);
+    $('e-burn').textContent = rs(R.burn);
+    $('e-op').textContent = rs(R.op);
+    // verdict: profit per km as a share of the driver's own target, out of 10
+    const ratio = R.perKm / R.tgt, score = Math.max(0, Math.min(10, ratio * 10)), v = $('verdict');
+    $('v-score').textContent = score.toFixed(1);
+    v.classList.toggle('good', R.net >= 0 && ratio >= 1); v.classList.toggle('bad', R.net < 0 || ratio < 0.6);
+    let t, s;
+    if (R.net < 0) { t = T('v.loss', 'Loss-making ride'); s = T('v.loss.s', 'Costs {v} more than it pays.', { v: rs(-R.net) }); }
+    else if (ratio >= 1) { t = T('v.good', 'Good ride'); s = T('v.good.s', 'Beats your {t}/km target by {d}.', { t: rs(R.tgt), d: rs(R.perKm - R.tgt) }); }
+    else if (ratio >= 0.6) { t = T('v.avg', 'Average ride'); s = T('v.avg.s', 'Below your {t}/km target. Take it if the drop is near a busy area.', { t: rs(R.tgt) }); }
+    else { t = T('v.weak', 'Weak ride'); s = T('v.weak.s', 'Well below your {t}/km target. Empty km and fuel eat the fare.', { t: rs(R.tgt) }); }
+    $('v-title').textContent = t; $('v-sub').textContent = s;
+  }
+
+  // ---------------------------------------------------------------- run the trip: the taxi drives, the meters and the wallet count along
+  function runTrip() {
+    if (anim) cancelAnimationFrame(anim.raf);
+    const R = rideCalc(), M = buildMap(R);
+    results(R);
+    $('stamp').classList.remove('on');
+    $('w-mode').textContent = T('w.mode.ride', 'One ride');
+    const tE = R.emptyKm ? Math.min(2.2, 0.6 + R.emptyKm * 0.12) : 0, tP = R.paidKm ? Math.min(3.6, 0.9 + R.paidKm * 0.12) : 0, total = tE + tP;
+    const costPerKm = R.km ? (R.fuel + R.maint) / R.km : 0, fuelPerKm = R.km ? R.fuel / R.km : 0;
+    let dropped = false, picked = false;
+    const frame = (now) => {
+      if (!anim.t0) anim.t0 = now;
+      const t = reduce ? total + 1 : (now - anim.t0) / 1000;
+      const uE = tE ? Math.min(1, t / tE) : 1, uP = tP ? Math.max(0, Math.min(1, (t - tE) / tP)) : 1;
+      const kmE = R.emptyKm * uE, kmP = R.paidKm * uP, kmNow = kmE + kmP;
+      M.g.eTrail.setAttribute('points', upto(M.eLeg, M.lenE * uE).map(P).join(' '));
+      M.g.pTrail.setAttribute('points', uP > 0 ? upto(M.pLeg, M.lenP * uP).map(P).join(' ') : '');
+      const onPaid = uE >= 1 && R.paidKm > 0, pos = onPaid ? at(M.pLeg, M.lenP * uP) : at(M.eLeg, M.lenE * uE);
+      M.g.car.setAttribute('cx', OX + pos[0] * cell); M.g.car.setAttribute('cy', OY + pos[1] * cell);
+      M.g.car.style.filter = `drop-shadow(0 0 10px ${onPaid ? '#FFB02E' : '#C9D3DC'})`;
+      M.g.tag.setAttribute('x', OX + pos[0] * cell); M.g.tag.setAttribute('y', OY + pos[1] * cell - 22);
+      M.g.tag.setAttribute('fill', onPaid ? '#FFB02E' : '#C9D3DC');
+      M.g.tag.textContent = uP >= 1 ? '' : onPaid ? T('tag.passenger', 'PASSENGER') : T('tag.empty', 'EMPTY');
+      if (uE >= 1 && !picked) { picked = true; M.g.pickup.setAttribute('opacity', 1); }
+      $('m-empty').textContent = (+kmE.toFixed(1)).toString();
+      $('m-paid').textContent = (+kmP.toFixed(1)).toString();
+      $('m-fuel').textContent = rs0(kmNow * fuelPerKm);
+      $('phase').textContent = uP >= 1 ? T('ph.drop', 'Dropped') : onPaid ? T('ph.trip', 'On trip') : T('ph.pickup', 'To pickup');
+      $('statusline').textContent = uP >= 1 ? T('st.done', '{km} km driven · {e} km paid by nobody ({p}%)', { km: +R.km.toFixed(1), e: +R.emptyKm.toFixed(1), p: R.km ? Math.round(R.emptyKm / R.km * 100) : 0 }) : onPaid ? T('st.on', 'Passenger on board · meter running') : T('st.empty', 'Driving empty to the pickup');
+      // wallet: costs run with every km; the fare lands at the drop, and the app takes its cut then
+      if (uP >= 1 && !dropped) { dropped = true; M.g.drop.setAttribute('opacity', 1); flash('c-in'); flash('c-out'); flash('c-net'); $('stamp').classList.add('on'); }
+      setWallet(dropped ? R.fare : 0, kmNow * costPerKm + (dropped ? R.cut : 0));
+      if (t < total + 0.05) anim.raf = requestAnimationFrame(frame);
+    };
+    anim = { t0: 0, raf: requestAnimationFrame(frame) };
+  }
+
+  // ---------------------------------------------------------------- full day
+  function dayCalc() {
+    const earn = num('d-earn'), comm = num('d-comm') / 100, km = num('d-km'), mil = Math.max(0.1, num('d-mil')), price = num('d-price');
+    const upk = num('d-mnt'), emi = num('d-emi'), ins = num('d-ins'), days = Math.max(1, num('d-days')), misc = num('d-misc');
+    const pay = earn - Math.round(earn * comm), fuel = km / mil * price, maint = km * upk, insD = ins / days, tp = pay - fuel - maint - emi - insD - misc;
+    $('w-misc').textContent = '−' + rs0(misc);
+    $('w-pay').textContent = rs0(pay); $('w-pay-s').textContent = T('w.pay.sub', '{e} − {c}% app cut', { e: rs0(earn), c: num('d-comm') });
+    const dv = VEH[$('d-veh').value], fname = $('d-veh').selectedOptions[0].textContent.replace(/\s*\(.*\)$/, '');
+    $('w-fuel').textContent = '−' + rs0(fuel); $('w-fuel-s').textContent = T('w.fuel.sub', '{f}: {km} km ÷ {m} {mu} × {p}/{pu}', { f: fname, km, m: mil, mu: U(dv.mu), p: rs(price), pu: U(dv.pu) });
+    $('w-mnt').textContent = '−' + rs0(maint); $('w-mnt-s').textContent = T('w.mnt.sub', '{km} km × {p}/km', { km, p: rs(upk) });
+    $('w-emi').textContent = '−' + rs0(emi);
+    $('w-ins').textContent = '−' + rs0(insD); $('w-ins-s').textContent = T('w.ins.sub', '{v} a year ÷ {d} days', { v: rs0(ins), d: days });
+    $('w-true').textContent = rs0(tp); $('w-true').className = tp < 0 ? 'neg' : 'pos';
+    $('w-note').textContent = tp < 0 ? T('w.lossnote', 'A loss of {v} a day', { v: rs0(-tp) }) : T('w.keepnote', 'Kept per day, after every cost');
+    $('d-stamp').textContent = tp < 0 ? T('stamp.loss', 'LOSS {v}', { v: rs0(-tp) }) : T('stamp.keep', 'KEEPS {v}', { v: rs0(tp) }); $('d-stamp').classList.toggle('loss', tp < 0);
+    $('d-phase').textContent = tp < 0 ? T('ph.loss', 'Running at a loss') : T('ph.profit', 'In profit');
+    return { earn, out: earn - tp };
+  }
+
+  // ---------------------------------------------------------------- inputs: remember on this device, replay the trip after typing stops
+  // price boxes are not in this list: they open with today's price, and a viewer's own price is kept only if they typed one
+  const IDS = ['r-fare', 'r-pick', 'r-km', 'r-min', 'r-comm', 'r-veh', 'r-mil', 'r-mnt', 'r-tgt', 'd-earn', 'd-comm', 'd-veh', 'd-km', 'd-mil', 'd-mnt', 'd-emi', 'd-ins', 'd-days', 'd-misc'];
+  const KEY = 'taxi-wallet-calculator-v3';
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (saved) {
+      IDS.forEach((id) => { if (saved[id] != null) $(id).value = saved[id]; });
+      for (const box of ['r', 'd']) if (saved[box + '-myprice'] != null) { $(box + '-price').value = saved[box + '-myprice']; PRICE[box].mine = true; }
+    }
+  } catch (e) {}
+  const save = () => {
+    try {
+      const o = Object.fromEntries(IDS.map((id) => [id, $(id).value]));
+      for (const box of ['r', 'd']) if (PRICE[box].mine) o[box + '-myprice'] = $(box + '-price').value;
+      localStorage.setItem(KEY, JSON.stringify(o));
+    } catch (e) {}
+  };
+  // typing in a price box makes it "your price"; the button under it goes back to today's
+  $('r-price').addEventListener('input', () => { PRICE.r.mine = true; priceTag('r'); save(); results(rideCalc()); later(); });
+  $('d-price').addEventListener('input', () => { PRICE.d.mine = true; priceTag('d'); save(); const d = dayCalc(); if (tab === 'day') setWallet(d.earn, d.out); });
+  for (const box of ['r', 'd']) $(box + '-ptag').addEventListener('click', (e) => {
+    if (!e.target.closest('button')) return;
+    useLive(box); save();
+    if (box === 'r') { results(rideCalc()); later(); } else { const d = dayCalc(); if (tab === 'day') setWallet(d.earn, d.out); }
+  });
+  let tab = 'ride', timer = null;
+  const later = () => { clearTimeout(timer); timer = setTimeout(runTrip, 450); };
+  IDS.filter((id) => id[0] === 'r').forEach((id) => $(id).addEventListener('input', () => { save(); results(rideCalc()); later(); }));
+  IDS.filter((id) => id[0] === 'd').forEach((id) => $(id).addEventListener('input', () => { save(); const d = dayCalc(); if (tab === 'day') setWallet(d.earn, d.out); }));
+  $('r-veh').addEventListener('change', () => { applyVehicle(true); save(); later(); });
+  $('d-veh').addEventListener('change', () => { applyDayFuel(true); save(); const d = dayCalc(); if (tab === 'day') setWallet(d.earn, d.out); });
+  $('fare-chips').addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (!b) return; $('r-fare').value = b.textContent.replace(/[^\d.]/g, ''); save(); later(); });
+  // on a phone the map is below the trip sheet: bring it into view, then run
+  $('go').addEventListener('click', () => {
+    const nav = $('map').closest('.screen'), r = nav.getBoundingClientRect();
+    if (r.top > window.innerHeight * 0.6 || r.bottom < 0) nav.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    runTrip();
+  });
+  $('replay').addEventListener('click', runTrip);
+
+  const show = (which) => {
+    tab = which;
+    ['ride', 'day'].forEach((k) => { $(k).hidden = k !== which; $('tab-' + k).setAttribute('aria-selected', String(k === which)); });
+    $('l-in').textContent = which === 'day' ? T('w.in.day', 'App earnings') : T('w.in.ride', 'Fare in');
+    if (which === 'day') { if (anim) cancelAnimationFrame(anim.raf); $('w-mode').textContent = T('w.mode.day', 'Full day'); const d = dayCalc(); setWallet(d.earn, d.out); }
+    else runTrip();
+    try { history.replaceState(null, '', which === 'day' ? '#day' : '#ride'); } catch (e) {}
+  };
+  $('tab-ride').addEventListener('click', () => show('ride'));
+  $('tab-day').addEventListener('click', () => show('day'));
+  if (window.I18N) I18N.init(window.TA_CALC);
+  applyVehicle(false);
+  applyDayFuel(false);
+  for (const box of ['r', 'd']) { if (PRICE[box].mine) priceTag(box); else useLive(box); }
+  dayCalc();
+  show(location.hash === '#day' ? 'day' : 'ride');
+
+  // live prices: the same prices.json the sakas.in price board uses (petrol & diesel from PPAC, daily; CNG monthly)
+  if (location.protocol.startsWith('http')) {
+    fetch('../prices.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then((p) => {
+      if (!p || !Array.isArray(p.fuel)) return;
+      for (const f of p.fuel) {
+        const v = VEH[f.id], now = Number(f.now);
+        if (v && now > 0) { v.price = now; v.asOf = f.asOf || v.asOf; v.src = String(f.source || v.src).replace(/\s*\((daily|pump price)\)\s*$/i, ''); }
+      }
+      for (const box of ['r', 'd']) { if (PRICE[box].mine) priceTag(box); else useLive(box); }
+      results(rideCalc());
+      const d = dayCalc(); if (tab === 'day') setWallet(d.earn, d.out); else runTrip();
+    }).catch(() => {});
+  }
+  // switching language: labels are swapped by the engine; redraw everything the script writes
+  if (window.I18N) I18N.onChange(() => {
+    applyVehicle(false); applyDayFuel(false); priceTag('r'); priceTag('d');
+    results(rideCalc()); const d = dayCalc();
+    if (tab === 'day') { $('w-mode').textContent = T('w.mode.day', 'Full day'); $('l-in').textContent = T('w.in.day', 'App earnings'); setWallet(d.earn, d.out); }
+    else { $('w-mode').textContent = T('w.mode.ride', 'One ride'); $('l-in').textContent = T('w.in.ride', 'Fare in'); runTrip(); }
+  });
+})();
+</script>
+</body>
+</html>
