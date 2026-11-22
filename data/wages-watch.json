@@ -2,6 +2,7 @@
   "Delhi": {
     "page": "https://labour.delhi.gov.in/labour/current-minimum-wage-rate",
     "links": [
+      "https://labour.delhi.gov.in/sites/default/files/Labour/generic_multiple_files/1da.pdf",
       "https://labour.delhi.gov.in/sites/default/files/Labour/generic_multiple_files/2damworder.pdf",
       "https://labour.delhi.gov.in/sites/default/files/Labour/generic_multiple_files/3da.pdf",
       "https://labour.delhi.gov.in/sites/default/files/Labour/generic_multiple_files/4da.pdf",
@@ -18,7 +19,7 @@
       "https://labour.delhi.gov.in/sites/default/files/Labour/generic_multiple_files/da15april2025.pdf": "769015 bytes, sha256 ecb24b6d068ee931"
     },
     "lastOk": "2026-11-22",
-    "lastChange": null,
+    "lastChange": "2026-11-22",
     "downAlerted": false
   },
   "Tamil Nadu": {
