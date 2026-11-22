@@ -54,6 +54,17 @@ In `fuel-daily.csv`, `petrol_per_litre` / `diesel_per_litre` are Chennai; the ot
 (`delhi_petrol_per_litre`, `mumbai_diesel_per_litre`, ...). On the site, visitors pick the city for petrol and diesel
 (the choice is remembered on their phone and shared with the calculator); everything else is Chennai.
 
+## Driver wages (used by the Saka Fuel Wallet app)
+
+`data/wages.json` holds the official minimum daily wage for drivers per state. The app reads it at
+https://sakas.in/data/wages.json and uses a state only when `"verified": true`.
+
+Every day at 7:00 AM IST, **Check minimum-wage sources** (`.github/workflows/check-wages.yml`, script
+`scripts/check_wages.py`) opens the official Delhi, Tamil Nadu, Maharashtra and West Bengal pages. It never changes a wage.
+When a new or changed wage document appears, it opens an **issue** in this repo (GitHub emails you). Then:
+open the document, and if it changes a driver wage, edit `data/wages.json` (amount, `effectiveFrom`, `notification`,
+`officialUrl`, `petrolAtEffective`) and close the issue. What it saw is kept in `data/wages-watch.json` (don't edit).
+
 ## Other files
 
 - `index.html` – the home page. `calculator/` – Taxi Wallet Calculator (https://sakas.in/calculator/).

@@ -1,0 +1,39 @@
+name: Check minimum-wage sources
+# Once a day at 7:00 AM IST: looks at the official Delhi, Tamil Nadu, Maharashtra and West Bengal minimum-wage pages.
+# It never changes a wage. If a new or changed wage document appears, it opens an issue (GitHub emails you).
+# It also saves what it saw (data/wages-watch.json) and the check date in data/wages.json.
+on:
+  schedule:
+    - cron: "30 1 * * *"   # 01:30 UTC = 7:00 AM IST
+  workflow_dispatch: {}
+permissions:
+  contents: write
+  issues: write
+concurrency:
+  group: update-site
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # pinned to an exact, checked version
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Read the official wage pages
+        run: python3 scripts/check_wages.py
+      - name: Open an issue if something changed
+        if: hashFiles('wage-alert.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --title "Minimum-wage source changed ($(date -u +%Y-%m-%d))" --body-file wage-alert.md
+          rm wage-alert.md
+      - name: Save what was checked
+        run: |
+          if [ -n "$(git status --porcelain data/wages-watch.json data/wages.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/wages-watch.json data/wages.json
+            git commit -m "Check minimum-wage sources"
+            git pull --rebase --autostash
+            git push
+          fi
