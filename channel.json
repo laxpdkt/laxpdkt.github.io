@@ -1,10 +1,10 @@
 {
-  "subscribers": 149,
-  "views": 10172,
-  "videos": 44,
-  "asOf": "2026-11-23T23:44Z",
-  "lastIncrease": "2026-11-21T12:00Z",
-  "gainedWeek": 1,
+  "subscribers": 150,
+  "views": 10457,
+  "videos": 42,
+  "asOf": "2026-11-24T23:43Z",
+  "lastIncrease": "2026-11-24T23:43Z",
+  "gainedWeek": 2,
   "history": [
     [
       "2026-11-20",
@@ -21,6 +21,10 @@
     [
       "2026-11-23",
       149
+    ],
+    [
+      "2026-11-24",
+      150
     ]
   ]
 }
