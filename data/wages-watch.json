@@ -18,7 +18,7 @@
       "https://labour.delhi.gov.in/sites/default/files/Labour/generic_multiple_files/minimum_wages_current.pdf": "562195 bytes, sha256 2cfa1d9ba08e1f10",
       "https://labour.delhi.gov.in/sites/default/files/Labour/generic_multiple_files/da15april2025.pdf": "769015 bytes, sha256 ecb24b6d068ee931"
     },
-    "lastOk": "2026-11-26",
+    "lastOk": "2026-11-27",
     "lastChange": "2026-11-22",
     "downAlerted": false
   },
@@ -269,7 +269,7 @@
     "files": {
       "https://labour.tn.gov.in/pdf/GO/G.O.%282D%29-No.01-Public-Motor-Transport.pdf": "2124346 bytes, sha256 5827dfb0897d2e28"
     },
-    "lastOk": "2026-11-26",
+    "lastOk": "2026-11-27",
     "lastChange": null,
     "downAlerted": false
   },
@@ -284,7 +284,7 @@
       "https://mahakamgar.maharashtra.gov.in/Site/Upload/Pdf/minimum-wages.pdf": "7500895 bytes, sha256 29cb06f7e60df183",
       "https://mahakamgar.maharashtra.gov.in/Upload/PDF/Employment%20in%20Public%20Motor%20Transport%20Final%20Notification.pdf": "2667905 bytes, sha256 98764061d380268a"
     },
-    "lastOk": "2026-11-26",
+    "lastOk": "2026-11-27",
     "lastChange": null,
     "downAlerted": false
   },

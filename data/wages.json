@@ -1,6 +1,6 @@
 {
   "_note": "Driver pay for Saka Fare check = state minimum wage for drivers per day (monthly / 26, as the notifications say) / paid minutes per day. Average of zones where a state has zones. Only figures read from the official government document are used; anything not verified is left out and the app asks the user to type the driver's daily wage. Central-sphere wages are not used (different and higher).",
-  "lastChecked": "2026-11-26",
+  "lastChecked": "2026-11-27",
   "paidMinsPerDay": 360,
   "fuelAdjust": "Optional: wage x (petrol price today / petrol price on the order's effective date) for the same city, from data/fuel-daily.csv (PPAC). A rough way to bring an old official wage up to date; not a government figure.",
   "states": {
